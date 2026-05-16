@@ -1,0 +1,327 @@
+import "./App.css";
+import base from "./assets/base.png";
+import { useState, useRef } from "react";
+
+function App() {
+  const [nomeEmpresa, setNomeEmpresa] = useState("Nome da Empresa");
+  const [temaText, setTemaText] = useState(`Introdução`);
+
+  const temas = temaText
+    .split("\n")
+    .map((tema) => tema.trim())
+    .filter(Boolean);
+
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [currentPhase, setCurrentPhase] = useState(0);
+
+  const maxPorLinha = 5;
+  const espacamentoX = 200;
+  const yTopo = 340;
+  const gapY = 240;
+
+  function quebrarTexto(texto: string, maxChars = 15) {
+    const palavras = texto.split(" ");
+    const linhas: string[] = [];
+
+    let linhaAtual = "";
+
+    for (const palavra of palavras) {
+      const teste = linhaAtual ? `${linhaAtual} ${palavra}` : palavra;
+
+      if (teste.length > maxChars) {
+        linhas.push(linhaAtual);
+        linhaAtual = palavra;
+      } else {
+        linhaAtual = teste;
+      }
+    }
+
+    if (linhaAtual) {
+      linhas.push(linhaAtual);
+    }
+
+    return linhas;
+  }
+
+  const pontos = temas.map((_, index) => {
+    const linha = Math.floor(index / maxPorLinha);
+    const coluna = index % maxPorLinha;
+
+    const xBase =
+      linha % 2 === 0
+        ? 200 + coluna * espacamentoX
+        : 200 + (maxPorLinha - 1 - coluna) * espacamentoX;
+
+    const y = yTopo + linha * gapY;
+
+    return { x: xBase, y };
+  });
+
+  const pathD = pontos.reduce((acc, ponto, index, arr) => {
+    if (index === 0) {
+      return `M ${ponto.x} ${ponto.y}`;
+    }
+
+    const anterior = arr[index - 1];
+    const linhaAnterior = Math.floor((index - 1) / maxPorLinha);
+    const linhaAtual = Math.floor(index / maxPorLinha);
+
+    if (linhaAtual === linhaAnterior) {
+      return `${acc} L ${ponto.x} ${ponto.y}`;
+    }
+
+    const direcao = linhaAtual % 2 === 1 ? 1 : -1;
+
+    const curvaOffset = 180;
+
+    const c1x = anterior.x + direcao * curvaOffset;
+    const c1y = anterior.y;
+
+    const c2x = ponto.x + direcao * curvaOffset;
+    const c2y = ponto.y;
+
+    return `${acc} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ponto.x} ${ponto.y}`;
+  }, "");
+  return (
+    <div className="app-shell">
+      <div className="controls">
+        <div className="control-row">
+          <label>Nome da empresa</label>
+          <input
+            value={nomeEmpresa}
+            onChange={(e) => setNomeEmpresa(e.target.value)}
+            placeholder="Digite o nome da empresa"
+          />
+        </div>
+
+        <div className="control-row">
+          <label>Temas (um por linha)</label>
+          <textarea
+            value={temaText}
+            onChange={(e) => setTemaText(e.target.value)}
+            rows={12}
+          />
+        </div>
+
+        <div className="download-row">
+          <button
+            className="btn-primary"
+            onClick={async () => {
+              try {
+                const svg = svgRef.current;
+                if (!svg) return;
+
+                // attempt to load Roboto fonts for consistent export
+                try {
+                  const css = await fetch(
+                    "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap",
+                  ).then((r) => r.text());
+                  const blocks = css.match(/@font-face\s*\{[^}]*\}/g) || [];
+                  for (const block of blocks) {
+                    const weightMatch = block.match(/font-weight:\s*(\d+)/);
+                    const urlMatch = block.match(/url\((https:[^)]*)\)/);
+                    if (urlMatch) {
+                      const url = urlMatch[1];
+                      const weight = weightMatch ? weightMatch[1] : "400";
+                      try {
+                        const ff = new FontFace("Roboto", `url(${url})`, {
+                          weight: String(weight),
+                        });
+                        await ff.load();
+                        // @ts-ignore
+                        document.fonts.add(ff);
+                      } catch (e) {
+                        // ignore font load errors
+                      }
+                    }
+                  }
+                } catch (e) {
+                  // ignore font stylesheet errors
+                }
+
+                const dpr = window.devicePixelRatio || 1;
+                const canvas = document.createElement("canvas");
+                canvas.width = 1600 * dpr;
+                canvas.height = 900 * dpr;
+                canvas.style.width = "1600px";
+                canvas.style.height = "900px";
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return;
+                ctx.scale(dpr, dpr);
+
+                const bg = new Image();
+                bg.crossOrigin = "anonymous";
+                bg.src = base;
+                await new Promise((res, rej) => {
+                  bg.onload = res;
+                  bg.onerror = rej;
+                });
+                ctx.drawImage(bg, 0, 0, 1600, 900);
+
+                const clone = svg.cloneNode(true) as SVGSVGElement;
+                clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+                const origEls = svg.querySelectorAll("*");
+                const cloneEls = clone.querySelectorAll("*");
+                origEls.forEach((origEl, i) => {
+                  const cloneEl = cloneEls[i] as Element | null;
+                  if (!cloneEl) return;
+                  const cs = window.getComputedStyle(origEl as Element);
+                  const props = [
+                    "fill",
+                    "stroke",
+                    "stroke-width",
+                    "stroke-linecap",
+                    "stroke-linejoin",
+                    "font-family",
+                    "font-size",
+                    "font-weight",
+                    "text-anchor",
+                    "letter-spacing",
+                  ];
+                  let styleText = "";
+                  props.forEach((p) => {
+                    const v = cs.getPropertyValue(p);
+                    if (v) styleText += `${p}: ${v}; `;
+                  });
+                  if (styleText) cloneEl.setAttribute("style", styleText);
+                });
+
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(clone);
+                const svgUrl =
+                  "data:image/svg+xml;charset=utf-8," +
+                  encodeURIComponent(svgString);
+
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                  try {
+                    ctx.drawImage(img, 0, 0, 1600, 900);
+                    canvas.toBlob((blob) => {
+                      if (!blob) return;
+                      const a = document.createElement("a");
+                      a.href = URL.createObjectURL(blob);
+                      a.download = `${nomeEmpresa || "esteira"}.png`;
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(a.href);
+                    }, "image/png");
+                  } catch (err) {
+                    alert("Erro ao desenhar imagem no canvas");
+                  }
+                };
+                img.onerror = () => alert("Erro ao converter SVG para imagem");
+                img.src = svgUrl;
+              } catch (err) {
+                alert("Erro ao gerar imagem: " + err);
+              }
+            }}
+          >
+            Baixar imagem
+          </button>
+        </div>
+
+        <div className="control-row">
+          <label>Fase atual</label>
+          <div className="phase-controls">
+            <button
+              onClick={() => setCurrentPhase((p) => Math.max(0, p - 1))}
+              className="btn-small"
+            >
+              ‹
+            </button>
+
+            <input
+              type="range"
+              min={0}
+              max={Math.max(0, temas.length - 1)}
+              value={currentPhase}
+              onChange={(e) => setCurrentPhase(Number(e.target.value))}
+            />
+
+            <button
+              onClick={() =>
+                setCurrentPhase((p) => Math.min(temas.length - 1, p + 1))
+              }
+              className="btn-small"
+            >
+              ›
+            </button>
+          </div>
+
+          <div className="phase-label">
+            {currentPhase + 1} — {temas[currentPhase] || "-"}
+          </div>
+        </div>
+      </div>
+
+      <div className="preview">
+        <img className="background" src={base} alt="Fundo" />
+
+        <svg ref={svgRef} width="1600" height="900" viewBox="0 0 1600 900">
+          <text
+            className="empresa"
+            x={750}
+            y={70}
+            textAnchor="middle"
+            dominantBaseline="hanging"
+          >
+            {nomeEmpresa || "Nome da Empresa"}
+          </text>
+          <path d={pathD} fill="none" stroke="white" strokeWidth={4} />
+
+          {pontos.map((ponto, i) => {
+            const isActive = i === currentPhase;
+            return (
+              <g key={i}>
+                {isActive && (
+                  <g className="active-marker">
+                    <text
+                      x={ponto.x}
+                      y={ponto.y - 28}
+                      textAnchor="middle"
+                      className="active-badge"
+                    >
+                      Você está aqui
+                    </text>
+                    <circle
+                      cx={ponto.x}
+                      cy={ponto.y}
+                      r={22}
+                      className="active-ring"
+                    />
+                  </g>
+                )}
+
+                <circle
+                  cx={ponto.x}
+                  cy={ponto.y}
+                  r={isActive ? 16 : 12}
+                  className={isActive ? "active-circle" : ""}
+                  strokeWidth={isActive ? 4 : 4}
+                />
+
+                <text
+                  x={ponto.x}
+                  y={ponto.y + 50}
+                  textAnchor="middle"
+                  className="temas"
+                >
+                  {quebrarTexto(temas[i]).map((linha, idx) => (
+                    <tspan key={idx} x={ponto.x} dy={idx === 0 ? 0 : 24}>
+                      {linha}
+                    </tspan>
+                  ))}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+export default App;
