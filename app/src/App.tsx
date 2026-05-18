@@ -16,7 +16,7 @@ function App() {
 
   const maxPorLinha = 5;
   const espacamentoX = 200;
-  const yTopo = 340;
+  const yTopo = 240;
   const gapY = 240;
 
   function quebrarTexto(texto: string, maxChars = 15) {
