@@ -3,8 +3,8 @@ import base from "./assets/base.png";
 import { useState, useRef } from "react";
 
 function App() {
-  const [nomeEmpresa, setNomeEmpresa] = useState("Nome da Empresa");
-  const [temaText, setTemaText] = useState(`Introdução`);
+  const [nomeEmpresa, setNomeEmpresa] = useState("");
+  const [temaText, setTemaText] = useState(``);
 
   const temas = temaText
     .split("\n")
@@ -111,7 +111,6 @@ function App() {
                 const svg = svgRef.current;
                 if (!svg) return;
 
-                // attempt to load Roboto fonts for consistent export
                 try {
                   const css = await fetch(
                     "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap",
@@ -135,9 +134,7 @@ function App() {
                       }
                     }
                   }
-                } catch (e) {
-                  // ignore font stylesheet errors
-                }
+                } catch (e) {}
 
                 const dpr = window.devicePixelRatio || 1;
                 const canvas = document.createElement("canvas");
