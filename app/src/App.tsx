@@ -20,10 +20,15 @@ function App() {
     .map((tema, index) => {
       if (!tema) return null;
 
-      return {
+      const item: TemaItem = {
         tema,
-        data: datasArray[index] || undefined,
       };
+
+      if (datasArray[index]) {
+        item.data = datasArray[index];
+      }
+
+      return item;
     })
     .filter((x): x is TemaItem => x !== null);
 
