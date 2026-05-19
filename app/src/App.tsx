@@ -6,6 +6,7 @@ import {
   listarEmpresas,
   removerEmpresa,
 } from "./services/empresas";
+import FakeSelect from "./components/FakeSelect";
 
 function App() {
   const [empresaId, setEmpresaId] = useState("");
@@ -136,11 +137,10 @@ function App() {
         <div className="control-row">
           <label>Empresas salvas</label>
 
-          <select
-            value={empresaId || ""}
-            onChange={(e) => {
-              const id = String(e.target.value);
-
+          <FakeSelect
+            empresas={empresas}
+            empresaId={empresaId}
+            onSelect={(id) => {
               setEmpresaId(id);
 
               const empresa = empresas.find((x) => String(x.id) === id);
@@ -157,17 +157,7 @@ function App() {
               setDataText(empresa.dataText);
               setCurrentPhase(empresa.currentPhase || 0);
             }}
-          >
-            <option value="">Selecione</option>
-
-            {empresas
-              .filter((empresa) => empresa.id)
-              .map((empresa) => (
-                <option key={empresa.id} value={empresa.id}>
-                  {empresa.nomeEmpresa}
-                </option>
-              ))}
-          </select>
+          />
         </div>
 
         <div className="control-row">
@@ -225,6 +215,38 @@ function App() {
             }}
           >
             Salvar empresa
+          </button>
+
+          <button
+            className="btn-danger"
+            onClick={async () => {
+              if (!empresaId) {
+                alert("Selecione uma empresa");
+                return;
+              }
+
+              const confirmar = confirm(
+                "Deseja realmente excluir esta empresa?",
+              );
+
+              if (!confirmar) return;
+
+              await removerEmpresa(empresaId);
+
+              setEmpresaId("");
+              setNomeEmpresa("");
+              setTemaText("");
+              setDataText("");
+
+              const lista = await listarEmpresas();
+              setEmpresas(lista);
+
+              console.log("empresaId antes de excluir:", empresaId);
+
+              alert("Empresa removida!");
+            }}
+          >
+            Excluir empresa
           </button>
 
           <button
@@ -342,38 +364,6 @@ function App() {
             }}
           >
             Baixar imagem
-          </button>
-
-          <button
-            className="btn-danger"
-            onClick={async () => {
-              if (!empresaId) {
-                alert("Selecione uma empresa");
-                return;
-              }
-
-              const confirmar = confirm(
-                "Deseja realmente excluir esta empresa?",
-              );
-
-              if (!confirmar) return;
-
-              await removerEmpresa(empresaId);
-
-              setEmpresaId("");
-              setNomeEmpresa("");
-              setTemaText("");
-              setDataText("");
-
-              const lista = await listarEmpresas();
-              setEmpresas(lista);
-
-              console.log("empresaId antes de excluir:", empresaId);
-
-              alert("Empresa removida!");
-            }}
-          >
-            Excluir empresa
           </button>
         </div>
 
