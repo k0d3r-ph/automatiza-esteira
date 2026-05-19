@@ -5,11 +5,27 @@ import { useState, useRef } from "react";
 function App() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [temaText, setTemaText] = useState(``);
+  const [dataText, setDataText] = useState(``);
 
-  const temas = temaText
-    .split("\n")
-    .map((tema) => tema.trim())
-    .filter(Boolean);
+  type TemaItem = {
+    tema: string;
+    data?: string;
+  };
+
+  const temasArray = temaText.split("\n").map((linha) => linha.trim());
+
+  const datasArray = dataText.split("\n").map((linha) => linha.trim());
+
+  const temas: TemaItem[] = temasArray
+    .map((tema, index) => {
+      if (!tema) return null;
+
+      return {
+        tema,
+        data: datasArray[index] || undefined,
+      };
+    })
+    .filter((x): x is TemaItem => x !== null);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [currentPhase, setCurrentPhase] = useState(0);
@@ -82,6 +98,7 @@ function App() {
 
     return `${acc} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ponto.x} ${ponto.y}`;
   }, "");
+
   return (
     <div className="app-shell">
       <div className="controls">
@@ -94,13 +111,26 @@ function App() {
           />
         </div>
 
-        <div className="control-row">
-          <label>Temas (um por linha)</label>
-          <textarea
-            value={temaText}
-            onChange={(e) => setTemaText(e.target.value)}
-            rows={12}
-          />
+        <div className="temas-wrapper">
+          <div className="control-row temas-box">
+            <label>Temas (um por linha)</label>
+
+            <textarea
+              value={temaText}
+              onChange={(e) => setTemaText(e.target.value)}
+              rows={12}
+            />
+          </div>
+
+          <div className="control-row datas-box">
+            <label>Datas</label>
+
+            <textarea
+              value={dataText}
+              onChange={(e) => setDataText(e.target.value)}
+              rows={12}
+            />
+          </div>
         </div>
 
         <div className="download-row">
@@ -249,7 +279,7 @@ function App() {
           </div>
 
           <div className="phase-label">
-            {currentPhase + 1} — {temas[currentPhase] || "-"}
+            {currentPhase + 1} — {temas[currentPhase]?.tema || "-"}
           </div>
         </div>
       </div>
@@ -271,13 +301,15 @@ function App() {
 
           {pontos.map((ponto, i) => {
             const isActive = i === currentPhase;
+            const item = temas[i];
+
             return (
               <g key={i}>
                 {isActive && (
                   <g className="active-marker">
                     <text
                       x={ponto.x}
-                      y={ponto.y - 28}
+                      y={item.data ? ponto.y - 80 : ponto.y - 40}
                       textAnchor="middle"
                       className="active-badge"
                     >
@@ -300,13 +332,24 @@ function App() {
                   strokeWidth={isActive ? 4 : 4}
                 />
 
+                {item?.data && (
+                  <text
+                    x={ponto.x}
+                    y={ponto.y - 34}
+                    textAnchor="middle"
+                    className="tema-data"
+                  >
+                    {item.data}
+                  </text>
+                )}
+
                 <text
                   x={ponto.x}
                   y={ponto.y + 50}
                   textAnchor="middle"
                   className="temas"
                 >
-                  {quebrarTexto(temas[i]).map((linha, idx) => (
+                  {quebrarTexto(item?.tema || "").map((linha, idx) => (
                     <tspan key={idx} x={ponto.x} dy={idx === 0 ? 0 : 24}>
                       {linha}
                     </tspan>

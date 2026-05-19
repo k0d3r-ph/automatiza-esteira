@@ -35,6 +35,33 @@
   font-weight: 600;
 }
 
+.tema-data {
+  font-size: 18px;
+}
+
+.temas-wrapper {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.temas-box {
+  flex: 1;
+}
+
+.temas-box label,
+.datas-box label {
+  text-align: center;
+}
+
+.datas-box {
+  width: 90px;
+}
+
+.datas-box textarea {
+  resize: none;
+}
+
 .controls input,
 .controls textarea {
   width: 100%;
@@ -139,7 +166,7 @@ body {
 
 .active-badge {
   fill: #ffecb3;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
 }
 
