@@ -1,11 +1,37 @@
 import "./App.css";
 import base from "./assets/base.png";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import {
+  salvarEmpresas,
+  listarEmpresas,
+  removerEmpresa,
+} from "./services/empresas";
 
 function App() {
+  const [empresaId, setEmpresaId] = useState("");
+  const [empresas, setEmpresas] = useState<
+    Array<{
+      id: string;
+      nomeEmpresa: string;
+      temaText: string;
+      dataText: string;
+      currentPhase: number;
+      updatedAt: number;
+    }>
+  >([]);
+
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [temaText, setTemaText] = useState(``);
   const [dataText, setDataText] = useState(``);
+
+  useEffect(() => {
+    async function carregar() {
+      const lista = await listarEmpresas();
+      setEmpresas(lista);
+    }
+
+    carregar();
+  }, []);
 
   type TemaItem = {
     tema: string;
@@ -108,6 +134,43 @@ function App() {
     <div className="app-shell">
       <div className="controls">
         <div className="control-row">
+          <label>Empresas salvas</label>
+
+          <select
+            value={empresaId || ""}
+            onChange={(e) => {
+              const id = String(e.target.value);
+
+              setEmpresaId(id);
+
+              const empresa = empresas.find((x) => String(x.id) === id);
+
+              if (!empresa) {
+                setNomeEmpresa("");
+                setTemaText("");
+                setDataText("");
+                return;
+              }
+
+              setNomeEmpresa(empresa.nomeEmpresa);
+              setTemaText(empresa.temaText);
+              setDataText(empresa.dataText);
+              setCurrentPhase(empresa.currentPhase || 0);
+            }}
+          >
+            <option value="">Selecione</option>
+
+            {empresas
+              .filter((empresa) => empresa.id)
+              .map((empresa) => (
+                <option key={empresa.id} value={empresa.id}>
+                  {empresa.nomeEmpresa}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        <div className="control-row">
           <label>Nome da empresa</label>
           <input
             value={nomeEmpresa}
@@ -142,6 +205,31 @@ function App() {
           <button
             className="btn-primary"
             onClick={async () => {
+              const novoId = await salvarEmpresas({
+                ...(empresaId ? { id: empresaId } : {}),
+                nomeEmpresa,
+                temaText,
+                dataText,
+                currentPhase,
+                updatedAt: Date.now(),
+              });
+
+              if (novoId) {
+                setEmpresaId(String(novoId));
+              }
+
+              const lista = await listarEmpresas();
+              setEmpresas(lista);
+
+              alert("Empresa salva!");
+            }}
+          >
+            Salvar empresa
+          </button>
+
+          <button
+            className="btn-primary"
+            onClick={async () => {
               try {
                 const svg = svgRef.current;
                 if (!svg) return;
@@ -162,16 +250,18 @@ function App() {
                           weight: String(weight),
                         });
                         await ff.load();
-                        // @ts-ignore
                         document.fonts.add(ff);
-                      } catch (e) {
+                      } catch {
                         // ignore font load errors
                       }
                     }
                   }
-                } catch (e) {}
+                } catch {
+                  // ignore font fetch errors
+                }
 
                 const dpr = window.devicePixelRatio || 1;
+
                 const canvas = document.createElement("canvas");
                 canvas.width = 1600 * dpr;
                 canvas.height = 900 * dpr;
@@ -240,18 +330,50 @@ function App() {
                       a.remove();
                       URL.revokeObjectURL(a.href);
                     }, "image/png");
-                  } catch (err) {
+                  } catch {
                     alert("Erro ao desenhar imagem no canvas");
                   }
                 };
                 img.onerror = () => alert("Erro ao converter SVG para imagem");
                 img.src = svgUrl;
-              } catch (err) {
-                alert("Erro ao gerar imagem: " + err);
+              } catch {
+                alert("Erro ao gerar imagem");
               }
             }}
           >
             Baixar imagem
+          </button>
+
+          <button
+            className="btn-danger"
+            onClick={async () => {
+              if (!empresaId) {
+                alert("Selecione uma empresa");
+                return;
+              }
+
+              const confirmar = confirm(
+                "Deseja realmente excluir esta empresa?",
+              );
+
+              if (!confirmar) return;
+
+              await removerEmpresa(empresaId);
+
+              setEmpresaId("");
+              setNomeEmpresa("");
+              setTemaText("");
+              setDataText("");
+
+              const lista = await listarEmpresas();
+              setEmpresas(lista);
+
+              console.log("empresaId antes de excluir:", empresaId);
+
+              alert("Empresa removida!");
+            }}
+          >
+            Excluir empresa
           </button>
         </div>
 

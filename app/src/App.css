@@ -62,8 +62,38 @@
   resize: none;
 }
 
+.btn-danger {
+  background: #d11a2a;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+
+  box-shadow: 0 8px 24px rgba(122, 0, 0, 0.28);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 12px 28px rgba(122, 0, 0, 0.4);
+
+  background: #e11d2f;
+}
+
+.btn-danger:active {
+  transform: scale(0.97);
+}
+
 .controls input,
-.controls textarea {
+.controls textarea,
+.controls select {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -184,7 +214,8 @@ body {
 .download-row {
   display: flex;
   justify-content: center;
-  margin-top: 8px;
+  margin: 1.5rem 0;
+  gap: 10px;
 }
 
 .btn-primary {
