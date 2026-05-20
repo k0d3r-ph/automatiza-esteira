@@ -7,6 +7,7 @@ import {
   removerEmpresa,
 } from "./services/empresas";
 import FakeSelect from "./components/FakeSelect";
+import { toast } from "sonner";
 
 function App() {
   const [empresaId, setEmpresaId] = useState("");
@@ -100,7 +101,15 @@ function App() {
         ? 200 + coluna * espacamentoX
         : 200 + (maxPorLinha - 1 - coluna) * espacamentoX;
 
-    const y = yTopo + linha * gapY;
+    const totalLinhas = Math.ceil(temas.length / maxPorLinha);
+
+    const linhasExtras = Math.max(0, totalLinhas - 3);
+
+    const compressao = linhasExtras * 100;
+
+    const gapDinamico = Math.max(150, gapY - compressao);
+
+    const y = linha === 0 ? yTopo : yTopo + linha * gapDinamico;
 
     return { x: xBase, y };
   });
@@ -211,7 +220,15 @@ function App() {
               const lista = await listarEmpresas();
               setEmpresas(lista);
 
-              alert("Empresa salva!");
+              toast.success("Empresa salva com sucesso!", {
+                duration: 2000,
+              });
+
+              setEmpresaId("");
+              setNomeEmpresa("");
+              setTemaText("");
+              setDataText("");
+              setCurrentPhase(0);
             }}
           >
             Salvar empresa
@@ -221,7 +238,7 @@ function App() {
             className="btn-danger"
             onClick={async () => {
               if (!empresaId) {
-                alert("Selecione uma empresa");
+                toast.warning("Selecione uma empresa");
                 return;
               }
 
@@ -359,7 +376,7 @@ function App() {
                 img.onerror = () => alert("Erro ao converter SVG para imagem");
                 img.src = svgUrl;
               } catch {
-                alert("Erro ao gerar imagem");
+                toast.error("Erro ao gerar imagem");
               }
             }}
           >
