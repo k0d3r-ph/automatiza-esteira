@@ -242,25 +242,32 @@ function App() {
                 return;
               }
 
-              const confirmar = confirm(
-                "Deseja realmente excluir esta empresa?",
-              );
+              toast("Deseja realmente excluir esta empresa?", {
+                action: {
+                  label: "Excluir",
+                  onClick: async () => {
+                    await removerEmpresa(empresaId);
 
-              if (!confirmar) return;
+                    setEmpresaId("");
+                    setNomeEmpresa("");
+                    setTemaText("");
+                    setDataText("");
+                    setCurrentPhase(0);
 
-              await removerEmpresa(empresaId);
+                    const lista = await listarEmpresas();
+                    setEmpresas(lista);
 
-              setEmpresaId("");
-              setNomeEmpresa("");
-              setTemaText("");
-              setDataText("");
+                    toast.success("Empresa removida com sucesso!");
+                  },
+                },
 
-              const lista = await listarEmpresas();
-              setEmpresas(lista);
+                cancel: {
+                  label: "Cancelar",
+                  onClick: () => {},
+                },
 
-              console.log("empresaId antes de excluir:", empresaId);
-
-              alert("Empresa removida!");
+                duration: 10000,
+              });
             }}
           >
             Excluir empresa
