@@ -25,6 +25,9 @@ function App() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [temaText, setTemaText] = useState(``);
   const [dataText, setDataText] = useState(``);
+  const empresasOrdenadas = [...empresas].sort((a, b) =>
+    a.nomeEmpresa.localeCompare(b.nomeEmpresa, "pt-BR"),
+  );
 
   useEffect(() => {
     async function carregar() {
@@ -147,7 +150,7 @@ function App() {
           <label>Empresas salvas</label>
 
           <FakeSelect
-            empresas={empresas}
+            empresas={empresasOrdenadas}
             empresaId={empresaId}
             onSelect={(id) => {
               setEmpresaId(id);
