@@ -9,6 +9,15 @@ import {
 import FakeSelect from "./components/FakeSelect";
 import { toast } from "sonner";
 
+function normalizarNome(nome: string) {
+  return nome
+    .trim()
+    .toLowerCase()
+    .normalize("NFD") // decompõe acentos
+    .replace(/[\u0300-\u036f]/g, "") // remove acentos
+    .replace(/\s+/g, ""); // remove todos os espaços
+}
+
 function App() {
   const [empresaId, setEmpresaId] = useState("");
   const [empresas, setEmpresas] = useState<
@@ -207,6 +216,17 @@ function App() {
           <button
             className="btn-primary"
             onClick={async () => {
+              const nomeDuplicado = empresas.some(
+                (e) =>
+                  normalizarNome(e.nomeEmpresa) ===
+                    normalizarNome(nomeEmpresa) && String(e.id) !== empresaId,
+              );
+
+              if (nomeDuplicado) {
+                toast.error("Já existe uma empresa com este nome.");
+                return;
+              }
+
               const novoId = await salvarEmpresas({
                 ...(empresaId ? { id: empresaId } : {}),
                 nomeEmpresa,
