@@ -216,6 +216,11 @@ function Esteira() {
           <button
             className="btn-primary"
             onClick={async () => {
+              if (!nomeEmpresa.trim()) {
+                toast.error("Digite o nome da empresa.");
+                return;
+              }
+
               const nomeDuplicado = empresas.some(
                 (e) =>
                   normalizarNome(e.nomeEmpresa) ===
