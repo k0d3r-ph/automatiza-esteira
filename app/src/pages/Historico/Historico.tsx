@@ -8,7 +8,6 @@ import {
 import { listarEmpresas } from "../../services/empresas";
 import type { Ocorrencia, Empresa } from "../../types";
 import "./Historico.css";
-import FakeSelect from "../../components/FakeSelect";
 
 const TIPOS = ["Reclamação", "Solicitação", "Informação", "Elogio"];
 
@@ -36,17 +35,6 @@ const EMPTY: Omit<Ocorrencia, "id" | "createdAt" | "updatedAt"> = {
   status: "aberta",
 };
 
-function formatarData(ts?: number) {
-  if (!ts) return "—";
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(ts));
-}
-
 export function Historico() {
   const [empresasList, setEmpresasList] = useState<Empresa[]>([]);
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
@@ -54,7 +42,7 @@ export function Historico() {
   const [form, setForm] = useState({ ...EMPTY });
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState<string>("todos");
+  const [filtroStatus] = useState<string>("todos");
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [painelAberto, setPainelAberto] = useState(false);
@@ -150,12 +138,6 @@ export function Historico() {
     const statusOk = filtroStatus === "todos" || o.status === filtroStatus;
     return bate && statusOk;
   });
-
-  const contadores = {
-    aberta: ocorrencias.filter((o) => o.status === "aberta").length,
-    em_andamento: ocorrencias.filter((o) => o.status === "em_andamento").length,
-    resolvida: ocorrencias.filter((o) => o.status === "resolvida").length,
-  };
 
   return (
     <div className="hist-shell">
