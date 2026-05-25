@@ -8,6 +8,9 @@ import {
 import { listarEmpresas } from "../../services/empresas";
 import type { Ocorrencia, Empresa } from "../../types";
 import "./Historico.css";
+import { Star, GraduationCap, Wrench, TrendingUp } from "lucide-react";
+
+import { FaWhatsapp } from "react-icons/fa";
 
 const TIPOS = ["Reclamação", "Solicitação", "Informação", "Elogio"];
 
@@ -18,6 +21,22 @@ const CANAIS = [
   "Interna Suporte",
   "Interna Comercial",
 ];
+
+const CANAIS_CLASS: Record<string, string> = {
+  Whatsapp: "canal-whatsapp",
+  CSAT: "canal-csat",
+  Treinamento: "canal-treinamento",
+  "Interna Suporte": "canal-interna-suporte",
+  "Interna Comercial": "canal-interna-comercial",
+};
+
+const CANAIS_ICONES: Record<string, React.ReactNode> = {
+  Whatsapp: <FaWhatsapp size={14} />,
+  CSAT: <Star size={14} />,
+  Treinamento: <GraduationCap size={14} />,
+  "Interna Suporte": <Wrench size={14} />,
+  "Interna Comercial": <TrendingUp size={14} />,
+};
 
 const TIPO_CLASS: Record<string, string> = {
   Reclamação: "tipo--reclamacao",
@@ -171,6 +190,7 @@ export function Historico() {
         <table className="hist-table">
           <thead>
             <tr>
+              <th>Empresa</th>
               <th>Data</th>
               <th>Hora</th>
               <th>Canal de interação</th>
@@ -191,6 +211,8 @@ export function Historico() {
                     className="hist-row-click"
                     onClick={() => setSelecionada(o)}
                   >
+                    <td>{o.empresa}</td>
+
                     <td>{data.toLocaleDateString("pt-BR")}</td>
 
                     <td>
@@ -200,7 +222,17 @@ export function Historico() {
                       })}
                     </td>
 
-                    <td>{o.canal}</td>
+                    <td>
+                      <span
+                        className={`hist-item-canal ${CANAIS_CLASS[o.canal] || ""}`}
+                      >
+                        <span className="canal-icon">
+                          {CANAIS_ICONES[o.canal]}
+                        </span>
+
+                        {o.canal}
+                      </span>
+                    </td>
 
                     <td>
                       <span

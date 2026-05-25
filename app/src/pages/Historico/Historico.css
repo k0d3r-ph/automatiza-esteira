@@ -12,6 +12,16 @@
   margin-bottom: 28px;
 }
 
+.hist-empty {
+  font-weight: bold;
+  font-size: 17px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+}
+
 .hist-header-inner {
   display: flex;
   align-items: flex-start;
@@ -40,6 +50,62 @@
   align-self: center;
 }
 
+.hist-item-canal {
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.canal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.hist-item-canal svg {
+  flex-shrink: 0;
+}
+
+.canal-whatsapp {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.canal-csat {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.canal-treinamento {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border-color: #d8b4fe;
+}
+
+.canal-interna-comercial {
+  background: #ffe4e6;
+  color: #be123c;
+  border-color: #fda4af;
+}
+
+.canal-interna-suporte {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
 /* ── Cards de resumo ── */
 .hist-cards {
   display: flex;
@@ -53,8 +119,10 @@
 
 .hist-item-tipo-detail {
   display: inline-flex !important;
-  font-size: 1.1rem !important;
-  padding: 0.8rem 1.4rem !important;
+  width: fit-content;
+  align-self: flex-start;
+  font-size: 0.9rem !important;
+  padding: 0.6rem 1rem !important;
   border-width: 2px !important;
 }
 
