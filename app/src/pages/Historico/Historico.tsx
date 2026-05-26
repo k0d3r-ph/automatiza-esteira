@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
   salvarOcorrencia,
@@ -6,13 +7,13 @@ import {
   removerOcorrencia,
 } from "../../services/ocorrencias";
 import { listarEmpresas } from "../../services/empresas";
-import type { Ocorrencia, Empresa } from "../../types";
+import type { Ocorrencia, Empresa, OcorrenciaForm } from "../../types";
 import "./Historico.css";
 import { Star, GraduationCap, Wrench, TrendingUp } from "lucide-react";
 
 import { FaWhatsapp } from "react-icons/fa";
 
-const TIPOS = ["Reclamação", "Solicitação", "Informação", "Elogio"];
+const TIPOS = ["Informativa", "Financeira", "Comercial", "Treinamento"];
 
 const CANAIS = [
   "Whatsapp",
@@ -45,13 +46,13 @@ const TIPO_CLASS: Record<string, string> = {
   Elogio: "tipo--elogio",
 };
 
-const EMPTY: Omit<Ocorrencia, "id" | "createdAt" | "updatedAt"> = {
+const EMPTY: OcorrenciaForm = {
   empresa: "",
   tipo: "",
   descricao: "",
   canal: "",
   responsavel: "",
-  status: "aberta",
+  dataOcorrencia: "",
 };
 
 export function Historico() {
@@ -61,10 +62,19 @@ export function Historico() {
   const [form, setForm] = useState({ ...EMPTY });
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
-  const [filtroStatus] = useState<string>("todos");
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [painelAberto, setPainelAberto] = useState(false);
+
+  const [searchParams] = useSearchParams();
+
+  const empresaFiltro = searchParams.get("empresa") || "";
+
+  function dateToTimestamp(dateStr: string) {
+    const [year, month, day] = dateStr.split("-").map(Number);
+
+    return new Date(year, month - 1, day).getTime();
+  }
 
   async function carregar() {
     setLoading(true);
@@ -103,8 +113,8 @@ export function Historico() {
       tipo: o.tipo,
       descricao: o.descricao,
       responsavel: o.responsavel,
-      status: o.status,
       canal: o.canal,
+      dataOcorrencia: o.dataOcorrencia,
     });
     setEditandoId(o.id ?? null);
     setPainelAberto(true);
@@ -123,7 +133,19 @@ export function Historico() {
     }
 
     setSalvando(true);
-    await salvarOcorrencia(editandoId ? { ...form, id: editandoId } : form);
+    await salvarOcorrencia(
+      editandoId
+        ? {
+            ...form,
+            id: editandoId,
+            dataOcorrencia: new Date(form.dataOcorrencia).getTime(),
+          }
+        : {
+            ...form,
+            dataOcorrencia: dateToTimestamp(form.dataOcorrencia),
+          },
+    );
+
     await carregar();
     setSalvando(false);
     cancelar();
@@ -149,15 +171,18 @@ export function Historico() {
 
   const filtradas = ocorrencias.filter((o) => {
     const texto = busca.toLowerCase();
-    const bate =
+
+    const bateBusca =
       o.empresa.toLowerCase().includes(texto) ||
       o.tipo.toLowerCase().includes(texto) ||
       o.descricao.toLowerCase().includes(texto) ||
       o.responsavel.toLowerCase().includes(texto);
-    const statusOk = filtroStatus === "todos" || o.status === filtroStatus;
-    return bate && statusOk;
-  });
 
+    const empresaOk =
+      !empresaFiltro || o.empresa.toLowerCase() === empresaFiltro.toLowerCase();
+
+    return bateBusca && empresaOk;
+  });
   return (
     <div className="hist-shell">
       {/* Header */}
@@ -362,6 +387,19 @@ export function Historico() {
                     </option>
                   ))}
               </select>
+            </div>
+
+            <div className="hist-campo">
+              <input
+                type="date"
+                value={form.dataOcorrencia}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    dataOcorrencia: e.target.value,
+                  })
+                }
+              />
             </div>
 
             <div className="hist-campo">

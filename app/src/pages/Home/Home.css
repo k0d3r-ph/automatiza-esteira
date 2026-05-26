@@ -1,0 +1,195 @@
+.monitoramento-page {
+  padding: 2rem;
+  color: white;
+  min-height: 100vh;
+  background: #0f172a;
+}
+
+.monitoramento-page header {
+  margin-bottom: 2rem;
+}
+
+.monitoramento-page h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.monitoramento-page p {
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.monitoramento-page table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.monitoramento-page thead {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.monitoramento-page th {
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.monitoramento-page td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.95rem;
+}
+
+.monitoramento-page tbody tr {
+  transition: background 0.2s ease;
+}
+
+.monitoramento-page tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.monitoramento-page tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.linha-cliente {
+  cursor: pointer;
+}
+
+.cliente-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999;
+}
+
+.cliente-modal {
+  width: 400px;
+
+  background: #0f172a;
+
+  border-radius: 20px;
+
+  padding: 2rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cliente-modal h2 {
+  margin-bottom: 1.5rem;
+}
+
+.cliente-modal button {
+  width: 100%;
+
+  margin-top: 1rem;
+
+  padding: 1rem;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #1e293b;
+
+  color: white;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.cliente-modal button:hover {
+  background: #334155;
+}
+
+.cliente-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+}
+
+.cliente-modal {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.8rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.cliente-modal h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.cliente-modal input,
+.cliente-modal select {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.cliente-modal input:focus,
+.cliente-modal select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.cliente-modal .btn-primary {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  transition: 0.2s ease;
+}
+
+.cliente-modal .btn-primary:hover {
+  background: #1d4ed8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

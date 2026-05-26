@@ -8,6 +8,7 @@ import {
 } from "../../services/empresas";
 import FakeSelect from "../../components/FakeSelect";
 import { toast } from "sonner";
+import { useParams } from "react-router-dom";
 
 function normalizarNome(nome: string) {
   return nome
@@ -19,6 +20,7 @@ function normalizarNome(nome: string) {
 }
 
 function Esteira() {
+  const { id } = useParams();
   const [empresaId, setEmpresaId] = useState("");
   const [empresas, setEmpresas] = useState<
     Array<{
@@ -34,6 +36,7 @@ function Esteira() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [temaText, setTemaText] = useState(``);
   const [dataText, setDataText] = useState(``);
+  const [currentPhase, setCurrentPhase] = useState(0);
   const empresasOrdenadas = [...empresas].sort((a, b) =>
     a.nomeEmpresa.localeCompare(b.nomeEmpresa, "pt-BR"),
   );
@@ -42,10 +45,26 @@ function Esteira() {
     async function carregar() {
       const lista = await listarEmpresas();
       setEmpresas(lista);
+
+      if (id) {
+        const empresa = lista.find((x) => String(x.id) === id);
+
+        if (!empresa) return;
+
+        setEmpresaId(String(empresa.id));
+
+        setNomeEmpresa(empresa.nomeEmpresa);
+
+        setTemaText(empresa.temaText);
+
+        setDataText(empresa.dataText);
+
+        setCurrentPhase(empresa.currentPhase || 0);
+      }
     }
 
     carregar();
-  }, []);
+  }, [id]);
 
   type TemaItem = {
     tema: string;
@@ -73,7 +92,6 @@ function Esteira() {
     .filter((x): x is TemaItem => x !== null);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [currentPhase, setCurrentPhase] = useState(0);
 
   const maxPorLinha = 5;
   const espacamentoX = 200;

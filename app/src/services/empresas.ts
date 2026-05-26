@@ -12,7 +12,7 @@ import type { Empresa } from "../types";
 
 const COLLECTION = "empresas";
 
-export async function salvarEmpresas(empresa: Empresa) {
+export async function salvarEmpresas(empresa: Partial<Empresa>) {
   if (empresa.id) {
     const ref = doc(db, COLLECTION, empresa.id);
 

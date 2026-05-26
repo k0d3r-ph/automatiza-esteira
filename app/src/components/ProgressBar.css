@@ -1,0 +1,12 @@
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-fill {
+  height: 8px;
+  border-radius: 999px;
+  background: #4caf50;
+  min-width: 0;
+}
