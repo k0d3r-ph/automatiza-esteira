@@ -30,6 +30,7 @@ export type Ocorrencia = {
   createdAt?: number;
   dataOcorrencia: number;
   updatedAt?: number;
+  temaOcorrencia?: string[];
 };
 
 export type OcorrenciaForm = {
@@ -40,6 +41,7 @@ export type OcorrenciaForm = {
   responsavel: string;
   dataOcorrencia: string;
   horaOcorrencia?: string;
+  temaOcorrencia?: string[];
 };
 
 export interface Historico {

@@ -57,6 +57,7 @@ const EMPTY: OcorrenciaForm = {
   responsavel: "",
   dataOcorrencia: "",
   horaOcorrencia: "",
+  temaOcorrencia: [],
 };
 
 export function Historico() {
@@ -126,6 +127,7 @@ export function Historico() {
       canal: o.canal,
       dataOcorrencia: dataFormatada,
       horaOcorrencia: hora,
+      temaOcorrencia: o.temaOcorrencia ?? [],
     });
     setEditandoId(o.id ?? null);
     setPainelAberto(true);
@@ -138,6 +140,7 @@ export function Historico() {
   }
 
   async function salvar() {
+    console.log("temaOcorrencia:", form.temaOcorrencia);
     if (!form.empresa.trim() || !form.tipo || !form.descricao.trim()) {
       toast.error("Preencha empresa, tipo e descrição.");
       return;
@@ -349,6 +352,23 @@ export function Historico() {
                       </strong>
                     </div>
                   )}
+
+                {selecionada.temaOcorrencia &&
+                  selecionada.temaOcorrencia.length > 0 && (
+                    <div className="hist-detail-desc">
+                      <span>Temas abordados</span>
+                      <div className="temas-selecionados">
+                        {selecionada.temaOcorrencia.map((tema) => (
+                          <span
+                            key={tema}
+                            className={`tema-tag ${["Ausente", "Cancelado"].includes(tema) ? "tema-tag-alerta" : ""}`}
+                          >
+                            {tema}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               <div className="hist-detail-desc">
@@ -422,7 +442,7 @@ export function Historico() {
 
             <div className="hist-campo hist-campo-row">
               <div>
-                <label>Data</label>
+                <label>Data do agendamento (não obrigatório)</label>
                 <input
                   type="date"
                   value={form.dataOcorrencia}
@@ -436,7 +456,7 @@ export function Historico() {
               </div>
 
               <div>
-                <label>Hora</label>
+                <label>Hora (não obrigatório)</label>
                 <input
                   type="time"
                   value={form.horaOcorrencia ?? ""}
@@ -476,6 +496,48 @@ export function Historico() {
                 ))}
               </select>
             </div>
+
+            {form.tipo === "Treinamento" && (
+              <div className="hist-campo">
+                <label>Temas abordados</label>
+                <div className="temas-lista">
+                  {[
+                    "Ausente",
+                    "Cancelado",
+                    ...(() => {
+                      const empresa = empresasList.find(
+                        (e) =>
+                          e.nomeEmpresa.trim().toLowerCase() ===
+                          form.empresa.trim().toLowerCase(),
+                      );
+                      return empresa?.temaText
+                        ? empresa.temaText
+                            .trim()
+                            .split(/\s{2,}|\n/)
+                            .filter(Boolean)
+                        : [];
+                    })(),
+                  ].map((tema) => (
+                    <label key={tema} className="tema-opcao">
+                      <input
+                        type="checkbox"
+                        checked={form.temaOcorrencia?.includes(tema) ?? false}
+                        onChange={(e) => {
+                          const atual = form.temaOcorrencia ?? [];
+                          setForm({
+                            ...form,
+                            temaOcorrencia: e.target.checked
+                              ? [...atual, tema]
+                              : atual.filter((t) => t !== tema),
+                          });
+                        }}
+                      />
+                      {tema}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="hist-campo">
               <label>Descrição *</label>
