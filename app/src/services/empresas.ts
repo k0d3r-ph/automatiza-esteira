@@ -24,8 +24,10 @@ export async function salvarEmpresas(empresa: Partial<Empresa>) {
     return empresa.id;
   }
 
+  const { id, ...dados } = empresa;
+
   const docRef = await addDoc(collection(db, COLLECTION), {
-    ...empresa,
+    ...dados,
     updatedAt: Date.now(),
   });
 

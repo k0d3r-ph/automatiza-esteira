@@ -65,6 +65,12 @@
   transition: all 0.2s ease;
 }
 
+.canal-treinamento {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border-color: #d8b4fe;
+}
+
 .canal-icon {
   display: flex;
   align-items: center;
@@ -74,6 +80,15 @@
 
 .hist-item-canal svg {
   flex-shrink: 0;
+}
+
+.hist-campo-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.hist-campo-row > div {
+  flex: 1;
 }
 
 .canal-whatsapp {
@@ -445,32 +460,40 @@
   border: 1px solid transparent;
 }
 
-/* Reclamação */
 .tipo--reclamacao {
   background: #fee2e2;
   color: #b91c1c;
   border-color: #fecaca;
 }
 
-/* Solicitação */
 .tipo--solicitacao {
   background: #dbeafe;
   color: #1d4ed8;
   border-color: #bfdbfe;
 }
 
-/* Informação */
 .tipo--informacao {
   background: #f3f4f6;
   color: #374151;
   border-color: #e5e7eb;
 }
 
-/* Elogio */
 .tipo--elogio {
   background: #dcfce7;
   color: #15803d;
   border-color: #bbf7d0;
+}
+
+.canal-cs {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.tipo--treinamento {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border-color: #d8b4fe;
 }
 
 .hist-item-desc {

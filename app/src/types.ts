@@ -39,6 +39,7 @@ export type OcorrenciaForm = {
   canal: string;
   responsavel: string;
   dataOcorrencia: string;
+  horaOcorrencia?: string;
 };
 
 export interface Historico {

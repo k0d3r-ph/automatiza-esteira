@@ -15,17 +15,19 @@ import type { Ocorrencia } from "../types";
 const COLLECTION = "ocorrencias";
 
 export async function salvarOcorrencia(ocorrencia: Ocorrencia) {
-  if (ocorrencia.id) {
-    const ref = doc(db, COLLECTION, ocorrencia.id);
+  const { horaOcorrencia, ...dados } = ocorrencia as any;
+
+  if (dados.id) {
+    const ref = doc(db, COLLECTION, dados.id);
     await updateDoc(ref, {
-      ...ocorrencia,
+      ...dados,
       updatedAt: Date.now(),
     });
-    return ocorrencia.id;
+    return dados.id;
   }
 
   const docRef = await addDoc(collection(db, COLLECTION), {
-    ...ocorrencia,
+    ...dados,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   });

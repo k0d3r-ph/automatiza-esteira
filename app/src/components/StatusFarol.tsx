@@ -6,5 +6,7 @@ type Props = {
 };
 
 export default function StatusFarol({ status }: Props) {
-  return <div className={`farol ${status}`} />;
+  if (status === "none") return null;
+
+  return <div className={`farol farol-${status}`} />;
 }

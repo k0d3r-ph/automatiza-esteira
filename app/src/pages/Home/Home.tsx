@@ -8,7 +8,11 @@ import StatusFarol from "../../components/StatusFarol";
 
 import { listarOcorrencias } from "../../services/ocorrencias";
 
-import { listarEmpresas, salvarEmpresas } from "../../services/empresas";
+import {
+  listarEmpresas,
+  removerEmpresa,
+  salvarEmpresas,
+} from "../../services/empresas";
 
 import {
   calcularDiasNaEsteira,
@@ -18,7 +22,7 @@ import {
   calcularTotalFases,
   obterUltimoTreinamento,
 } from "../../utils/monitoramento";
-import type { Empresa, Ocorrencia, OcorrenciaForm } from "../../types";
+import type { Empresa, Ocorrencia } from "../../types";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -27,7 +31,10 @@ export default function Home() {
     null,
   );
 
-  const [form, setForm] = useState<OcorrenciaForm>(EMPTY);
+  const [filtroCliente, setFiltroCliente] = useState("");
+  const [filtroResponsavel, setFiltroResponsavel] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("");
+  const [filtroProgresso, setFiltroProgresso] = useState("");
 
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
@@ -54,14 +61,25 @@ export default function Home() {
     null,
   );
 
-  function formatDateForInput(date?: number | string) {
-    if (!date) return "";
+  async function excluirCliente(id: string) {
+    await removerEmpresa(id);
+    const lista = await listarEmpresas();
+    setEmpresas(lista);
+    setClienteSelecionado(null);
+  }
 
-    const d = new Date(date);
+  function formatarData(data?: string | number) {
+    if (!data) return "-";
 
-    if (isNaN(d.getTime())) return "";
+    // Se for string no formato yyyy-mm-dd, adiciona o horário local pra evitar UTC
+    if (typeof data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data)) {
+      const [year, month, day] = data.split("-").map(Number);
+      return new Date(year, month - 1, day).toLocaleDateString("pt-BR");
+    }
 
-    return d.toISOString().split("T")[0];
+    const d = new Date(data);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleDateString("pt-BR");
   }
 
   function abrirCliente(empresa: Empresa) {
@@ -105,6 +123,7 @@ export default function Home() {
     setEmpresas(lista);
 
     setModalClienteAberto(false);
+    setClienteSelecionado(null);
   }
 
   useEffect(() => {
@@ -125,8 +144,6 @@ export default function Home() {
 
     carregarDados();
   }, []);
-
-  const [agora] = useState(() => Date.now());
 
   const dados = useMemo(() => {
     return empresas.map((empresa) => {
@@ -158,11 +175,38 @@ export default function Home() {
         tme,
         progresso,
         farol,
-
-        dias: calcularDiasNaEsteira(empresa.dataEntrada),
+        dias: calcularDiasNaEsteira(empresa.dataEntrada, progresso, dataBase),
       };
     });
   }, [empresas, historico]);
+
+  const dadosFiltrados = useMemo(() => {
+    return dados
+      .filter((e) => {
+        const clienteOk = !filtroCliente || e.nomeEmpresa === filtroCliente;
+        const responsavelOk =
+          !filtroResponsavel || e.responsavel === filtroResponsavel;
+        const tipoOk = !filtroTipo || e.tipo === filtroTipo;
+        const progressoOk =
+          !filtroProgresso ||
+          (filtroProgresso === "0-25" && e.progresso <= 25) ||
+          (filtroProgresso === "26-50" &&
+            e.progresso > 25 &&
+            e.progresso <= 50) ||
+          (filtroProgresso === "51-75" &&
+            e.progresso > 50 &&
+            e.progresso <= 75) ||
+          (filtroProgresso === "76-100" && e.progresso > 75);
+
+        return clienteOk && responsavelOk && tipoOk && progressoOk;
+      })
+      .sort((a, b) => {
+        const ordem = { vermelho: 0, amarelo: 1, verde: 2, none: 3 };
+        const farolDiff = (ordem[a.farol] ?? 3) - (ordem[b.farol] ?? 3);
+        if (farolDiff !== 0) return farolDiff; // ← primeiro ordena por farol
+        return a.nomeEmpresa.localeCompare(b.nomeEmpresa, "pt-BR"); // ← depois alfabético
+      });
+  }, [dados, filtroCliente, filtroResponsavel, filtroTipo, filtroProgresso]);
 
   return (
     <div className="monitoramento-page">
@@ -178,7 +222,82 @@ export default function Home() {
         </button>
       </div>
 
+      <div className="home-filtros">
+        <select
+          value={filtroCliente}
+          onChange={(e) => setFiltroCliente(e.target.value)}
+        >
+          <option value="">Todos os clientes</option>
+          {[...new Set(dados.map((e) => e.nomeEmpresa))].sort().map((nome) => (
+            <option key={nome} value={nome}>
+              {nome}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filtroResponsavel}
+          onChange={(e) => setFiltroResponsavel(e.target.value)}
+        >
+          <option value="">Todos os responsáveis</option>
+          {[...new Set(dados.map((e) => e.responsavel))]
+            .filter(Boolean)
+            .sort()
+            .map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+        </select>
+
+        <select
+          value={filtroTipo}
+          onChange={(e) => setFiltroTipo(e.target.value)}
+        >
+          <option value="">Todos os tipos</option>
+          <option value="Fast">Fast</option>
+          <option value="Safety">Safety</option>
+        </select>
+
+        <select
+          value={filtroProgresso}
+          onChange={(e) => setFiltroProgresso(e.target.value)}
+        >
+          <option value="">Qualquer progresso</option>
+          <option value="0-25">0% – 25%</option>
+          <option value="26-50">26% – 50%</option>
+          <option value="51-75">51% – 75%</option>
+          <option value="76-100">76% – 100%</option>
+        </select>
+
+        {(filtroCliente ||
+          filtroResponsavel ||
+          filtroTipo ||
+          filtroProgresso) && (
+          <button
+            onClick={() => {
+              setFiltroCliente("");
+              setFiltroResponsavel("");
+              setFiltroTipo("");
+              setFiltroProgresso("");
+            }}
+          >
+            Limpar filtros
+          </button>
+        )}
+      </div>
+
       <table>
+        <colgroup>
+          <col style={{ width: "1.5%" }} />
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "5%" }} />
+          <col style={{ width: "5%" }} />
+        </colgroup>
         <thead>
           <tr>
             <th>Status</th>
@@ -201,7 +320,7 @@ export default function Home() {
 
         <tbody>
           {!loading &&
-            dados.map((empresa) => (
+            dadosFiltrados.map((empresa) => (
               <tr
                 key={empresa.id}
                 className="linha-cliente"
@@ -216,7 +335,21 @@ export default function Home() {
                 <td>{empresa.responsavel}</td>
 
                 <td>
-                  <span>{empresa.tipo}</span>
+                  {empresa.tipo && (
+                    <span
+                      style={{
+                        padding: "2px 10px",
+                        borderRadius: "999px",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        background:
+                          empresa.tipo === "Fast" ? "#16a34a" : "#dc2626",
+                        color: "white",
+                      }}
+                    >
+                      {empresa.tipo}
+                    </span>
+                  )}
                 </td>
 
                 <td>{formatarData(empresa.dataEntrada)}</td>
@@ -258,69 +391,12 @@ export default function Home() {
             >
               Ver ocorrências
             </button>
-          </div>
-        </div>
-      )}
-      {modalClienteAberto && (
-        <div
-          className="cliente-overlay"
-          onClick={() => setModalClienteAberto(false)}
-        >
-          <div className="cliente-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{editandoClienteId ? "Editar cliente" : "Novo cliente"}</h2>
 
-            <input
-              placeholder="Nome da empresa"
-              value={clienteForm.nomeEmpresa}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  nomeEmpresa: e.target.value,
-                })
-              }
-            />
-
-            <select
-              value={clienteForm.responsavel}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  responsavel: e.target.value as Empresa["responsavel"],
-                })
-              }
+            <button
+              className="btn-excluir"
+              onClick={() => excluirCliente(clienteSelecionado.id!)}
             >
-              <option value="Pedro">Pedro</option>
-              <option value="Jean">Jean</option>
-              <option value="Jeff">Jeff</option>
-              <option value="Natalia">Natalia</option>
-            </select>
-
-            <select
-              value={clienteForm.tipo}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  tipo: e.target.value as Empresa["tipo"],
-                })
-              }
-            >
-              <option value="Fast">Fast</option>
-              <option value="Safety">Safety</option>
-            </select>
-
-            <input
-              type="date"
-              value={form.dataOcorrencia ?? ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  dataOcorrencia: e.target.value,
-                })
-              }
-            />
-
-            <button className="btn-primary" onClick={salvarCliente}>
-              Salvar cliente
+              Excluir cliente
             </button>
           </div>
         </div>
@@ -332,57 +408,76 @@ export default function Home() {
           onClick={() => setModalClienteAberto(false)}
         >
           <div className="cliente-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{editandoClienteId ? "Editar cliente" : "Novo cliente"}</h2>
+            <div className="cliente-modal-header">
+              <span className="cliente-modal-icon">
+                {editandoClienteId ? "✏️" : "🏢"}
+              </span>
+              <h2>{editandoClienteId ? "Editar cliente" : "Novo cliente"}</h2>
+            </div>
 
-            <input
-              placeholder="Nome da empresa"
-              value={clienteForm.nomeEmpresa}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  nomeEmpresa: e.target.value,
-                })
-              }
-            />
+            <div className="form-group">
+              <label>Nome da empresa</label>
+              <input
+                placeholder="Ex: Greensat"
+                value={clienteForm.nomeEmpresa}
+                onChange={(e) =>
+                  setClienteForm({
+                    ...clienteForm,
+                    nomeEmpresa: e.target.value,
+                  })
+                }
+              />
+            </div>
 
-            <select
-              value={clienteForm.responsavel}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  responsavel: e.target.value as Empresa["responsavel"],
-                })
-              }
-            >
-              <option value="Pedro">Pedro</option>
-              <option value="Jean">Jean</option>
-              <option value="Jeff">Jeff</option>
-              <option value="Natalia">Natalia</option>
-            </select>
+            <div className="form-group">
+              <label>Responsável</label>
+              <select
+                value={clienteForm.responsavel}
+                onChange={(e) =>
+                  setClienteForm({
+                    ...clienteForm,
+                    responsavel: e.target.value as Empresa["responsavel"],
+                  })
+                }
+              >
+                <option value="">Selecione...</option>
+                <option value="Pedro">Pedro</option>
+                <option value="Jean">Jean</option>
+                <option value="Jeff">Jeff</option>
+                <option value="Natalia">Natalia</option>
+              </select>
+            </div>
 
-            <select
-              value={clienteForm.tipo}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  tipo: e.target.value as Empresa["tipo"],
-                })
-              }
-            >
-              <option value="Fast">Fast</option>
-              <option value="Safety">Safety</option>
-            </select>
+            <div className="form-group">
+              <label>Tipo</label>
+              <select
+                value={clienteForm.tipo}
+                onChange={(e) =>
+                  setClienteForm({
+                    ...clienteForm,
+                    tipo: e.target.value as Empresa["tipo"],
+                  })
+                }
+              >
+                <option value="">Selecione...</option>
+                <option value="Fast">Fast</option>
+                <option value="Safety">Safety</option>
+              </select>
+            </div>
 
-            <input
-              type="date"
-              value={clienteForm.dataEntrada}
-              onChange={(e) =>
-                setClienteForm({
-                  ...clienteForm,
-                  dataEntrada: e.target.value,
-                })
-              }
-            />
+            <div className="form-group">
+              <label>Data de entrada</label>
+              <input
+                type="date"
+                value={clienteForm.dataEntrada}
+                onChange={(e) =>
+                  setClienteForm({
+                    ...clienteForm,
+                    dataEntrada: e.target.value,
+                  })
+                }
+              />
+            </div>
 
             <button className="btn-primary" onClick={salvarCliente}>
               Salvar cliente

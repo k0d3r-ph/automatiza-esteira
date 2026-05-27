@@ -18,7 +18,8 @@ const TIPOS = ["Informativa", "Financeira", "Comercial", "Treinamento"];
 const CANAIS = [
   "Whatsapp",
   "CSAT",
-  "Treinamento",
+  "Interna Treinamento",
+  "Interna CS",
   "Interna Suporte",
   "Interna Comercial",
 ];
@@ -27,6 +28,7 @@ const CANAIS_CLASS: Record<string, string> = {
   Whatsapp: "canal-whatsapp",
   CSAT: "canal-csat",
   Treinamento: "canal-treinamento",
+  "Interna CS": "canal-cs",
   "Interna Suporte": "canal-interna-suporte",
   "Interna Comercial": "canal-interna-comercial",
 };
@@ -44,6 +46,7 @@ const TIPO_CLASS: Record<string, string> = {
   Solicitação: "tipo--solicitacao",
   Informação: "tipo--informacao",
   Elogio: "tipo--elogio",
+  Treinamento: "tipo--treinamento",
 };
 
 const EMPTY: OcorrenciaForm = {
@@ -53,6 +56,7 @@ const EMPTY: OcorrenciaForm = {
   canal: "",
   responsavel: "",
   dataOcorrencia: "",
+  horaOcorrencia: "",
 };
 
 export function Historico() {
@@ -69,12 +73,6 @@ export function Historico() {
   const [searchParams] = useSearchParams();
 
   const empresaFiltro = searchParams.get("empresa") || "";
-
-  function dateToTimestamp(dateStr: string) {
-    const [year, month, day] = dateStr.split("-").map(Number);
-
-    return new Date(year, month - 1, day).getTime();
-  }
 
   async function carregar() {
     setLoading(true);
@@ -108,13 +106,23 @@ export function Historico() {
   }
 
   function abrirEdicao(o: Ocorrencia) {
+    const d = new Date(o.dataOcorrencia || 0);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const dataFormatada = o.dataOcorrencia ? `${year}-${month}-${day}` : "";
+
+    const hora = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
     setForm({
       empresa: o.empresa,
       tipo: o.tipo,
       descricao: o.descricao,
       responsavel: o.responsavel,
       canal: o.canal,
-      dataOcorrencia: o.dataOcorrencia,
+      dataOcorrencia: dataFormatada,
+      horaOcorrencia: hora,
     });
     setEditandoId(o.id ?? null);
     setPainelAberto(true);
@@ -132,18 +140,19 @@ export function Historico() {
       return;
     }
 
+    const [year, month, day] = form.dataOcorrencia.split("-").map(Number);
+    const [hours, minutes] = (form.horaOcorrencia || "00:00")
+      .split(":")
+      .map(Number);
+    const timestamp = new Date(year, month - 1, day, hours, minutes).getTime();
+
+    const base = { ...form, dataOcorrencia: timestamp };
+
     setSalvando(true);
     await salvarOcorrencia(
       editandoId
-        ? {
-            ...form,
-            id: editandoId,
-            dataOcorrencia: new Date(form.dataOcorrencia).getTime(),
-          }
-        : {
-            ...form,
-            dataOcorrencia: dateToTimestamp(form.dataOcorrencia),
-          },
+        ? { ...base, id: editandoId } // edição: inclui id
+        : base, // novo: sem id
     );
 
     await carregar();
@@ -228,7 +237,7 @@ export function Historico() {
           <tbody>
             {!loading &&
               filtradas.map((o) => {
-                const data = new Date(o.createdAt || 0);
+                const data = new Date(o.dataOcorrencia || o.createdAt || 0);
 
                 return (
                   <tr
@@ -372,37 +381,51 @@ export function Historico() {
 
             <div className="hist-campo">
               <label>Empresa *</label>
-              <select
+              <input
+                list="empresas-list"
                 value={form.empresa}
                 onChange={(e) => set("empresa", e.target.value)}
-              >
-                <option value="">Selecione uma empresa...</option>
+                placeholder="Digite para buscar..."
+              />
+              <datalist id="empresas-list">
                 {empresasList
                   .sort((a, b) =>
                     a.nomeEmpresa.localeCompare(b.nomeEmpresa, "pt-BR"),
                   )
                   .map((e) => (
-                    <option key={e.id} value={e.nomeEmpresa}>
-                      {e.nomeEmpresa}
-                    </option>
+                    <option key={e.id} value={e.nomeEmpresa} />
                   ))}
-              </select>
+              </datalist>
             </div>
 
-            <div className="hist-campo">
-              <input
-                type="date"
-                value={form.dataOcorrencia}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    dataOcorrencia: e.target.value,
-                  })
-                }
-              />
+            <div className="hist-campo hist-campo-row">
+              <div>
+                <label>Data</label>
+                <input
+                  type="date"
+                  value={form.dataOcorrencia}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      dataOcorrencia: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div>
+                <label>Hora</label>
+                <input
+                  type="time"
+                  value={form.horaOcorrencia ?? ""}
+                  onChange={(e) =>
+                    setForm({ ...form, horaOcorrencia: e.target.value })
+                  }
+                />
+              </div>
             </div>
 
-            <div className="hist-campo">
+            <div className="hist-campo hist-campo-row">
               <label>Tipo de ocorrência *</label>
               <select
                 value={form.tipo}

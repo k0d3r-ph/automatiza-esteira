@@ -1,17 +1,22 @@
-export function calcularDiasNaEsteira(dataEntrada?: string) {
-  if (!dataEntrada) {
-    return 0;
-  }
+export function calcularDiasNaEsteira(
+  dataEntrada?: string,
+  progresso?: number,
+  dataUltimoTreinamento?: number,
+) {
+  if (!dataEntrada) return 0;
 
-  const entrada = new Date(dataEntrada);
+  // ← interpreta no fuso local em vez de UTC
+  const [year, month, day] = dataEntrada.split("-").map(Number);
+  const entrada = new Date(year, month - 1, day);
 
-  if (isNaN(entrada.getTime())) {
-    return 0;
-  }
+  if (isNaN(entrada.getTime())) return 0;
 
-  const hoje = new Date();
+  const fim =
+    progresso !== undefined && progresso >= 100 && dataUltimoTreinamento
+      ? new Date(dataUltimoTreinamento)
+      : new Date();
 
   return Math.floor(
-    (hoje.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24),
+    (fim.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24),
   );
 }

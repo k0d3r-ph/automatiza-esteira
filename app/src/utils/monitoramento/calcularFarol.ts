@@ -1,4 +1,4 @@
-export type StatusFarolType = "verde" | "amarelo" | "vermelho";
+export type StatusFarolType = "verde" | "amarelo" | "vermelho" | "none";
 
 export function calcularFarol({
   progresso,
@@ -6,9 +6,11 @@ export function calcularFarol({
   alerta,
 }: {
   progresso: number;
-  tme: number;
+  tme: number | null;
   alerta?: boolean;
 }): StatusFarolType {
+  if (tme === null) return "none";
+
   if (alerta) {
     return "vermelho";
   }
