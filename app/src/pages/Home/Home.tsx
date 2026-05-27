@@ -330,7 +330,10 @@ export default function Home() {
                   <StatusFarol status={empresa.farol} />
                 </td>
 
-                <td>{empresa.nomeEmpresa}</td>
+                <td>
+                  {empresa.nomeEmpresa}
+                  {empresa.alerta && " 🔥"}
+                </td>
 
                 <td>{empresa.responsavel}</td>
 
@@ -477,6 +480,20 @@ export default function Home() {
                   })
                 }
               />
+            </div>
+
+            <div className="form-group">
+              <label>Alerta</label>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={clienteForm.alerta ?? false}
+                  onChange={(e) =>
+                    setClienteForm({ ...clienteForm, alerta: e.target.checked })
+                  }
+                />
+                Cliente em alerta 🔥
+              </label>
             </div>
 
             <button className="btn-primary" onClick={salvarCliente}>
