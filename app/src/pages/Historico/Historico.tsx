@@ -27,7 +27,7 @@ const CANAIS = [
 const CANAIS_CLASS: Record<string, string> = {
   Whatsapp: "canal-whatsapp",
   CSAT: "canal-csat",
-  Treinamento: "canal-treinamento",
+  "Interna Treinamento": "canal-treinamento",
   "Interna CS": "canal-cs",
   "Interna Suporte": "canal-interna-suporte",
   "Interna Comercial": "canal-interna-comercial",
@@ -106,14 +106,17 @@ export function Historico() {
   }
 
   function abrirEdicao(o: Ocorrencia) {
-    const d = new Date(o.dataOcorrencia || 0);
+    let dataFormatada = "";
+    let hora = "";
 
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const dataFormatada = o.dataOcorrencia ? `${year}-${month}-${day}` : "";
-
-    const hora = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    if (o.dataOcorrencia && o.dataOcorrencia > 0 && !isNaN(o.dataOcorrencia)) {
+      const d = new Date(o.dataOcorrencia);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      dataFormatada = `${year}-${month}-${day}`;
+      hora = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    }
 
     setForm({
       empresa: o.empresa,
@@ -140,20 +143,20 @@ export function Historico() {
       return;
     }
 
-    const [year, month, day] = form.dataOcorrencia.split("-").map(Number);
-    const [hours, minutes] = (form.horaOcorrencia || "00:00")
-      .split(":")
-      .map(Number);
-    const timestamp = new Date(year, month - 1, day, hours, minutes).getTime();
+    let timestamp = 0;
+
+    if (form.dataOcorrencia) {
+      const [year, month, day] = form.dataOcorrencia.split("-").map(Number);
+      const [hours, minutes] = (form.horaOcorrencia || "00:00")
+        .split(":")
+        .map(Number);
+      timestamp = new Date(year, month - 1, day, hours, minutes).getTime();
+    }
 
     const base = { ...form, dataOcorrencia: timestamp };
 
     setSalvando(true);
-    await salvarOcorrencia(
-      editandoId
-        ? { ...base, id: editandoId } // edição: inclui id
-        : base, // novo: sem id
-    );
+    await salvarOcorrencia(editandoId ? { ...base, id: editandoId } : base);
 
     await carregar();
     setSalvando(false);
@@ -317,7 +320,6 @@ export function Historico() {
 
                 <div>
                   <span>Tipo</span>
-
                   <strong
                     className={`hist-item-tipo hist-item-tipo-detail ${TIPO_CLASS[selecionada.tipo]}`}
                   >
@@ -329,6 +331,24 @@ export function Historico() {
                   <span>Responsável</span>
                   <strong>{selecionada.responsavel || "—"}</strong>
                 </div>
+
+                {selecionada.dataOcorrencia > 0 &&
+                  !isNaN(selecionada.dataOcorrencia) && (
+                    <div>
+                      <span>Data da ocorrência</span>
+                      <strong>
+                        {new Date(
+                          selecionada.dataOcorrencia,
+                        ).toLocaleDateString("pt-BR")}{" "}
+                        {new Date(
+                          selecionada.dataOcorrencia,
+                        ).toLocaleTimeString("pt-BR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </strong>
+                    </div>
+                  )}
               </div>
 
               <div className="hist-detail-desc">

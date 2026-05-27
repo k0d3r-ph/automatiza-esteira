@@ -31,9 +31,8 @@ export function calcularFarol({
     return "verde";
   }
 
-  if (tme > 20) {
-    return "vermelho";
-  }
+  if (tme > 20) return "vermelho";
+  if (tme < 0) return "verde";
 
   return "verde";
 }

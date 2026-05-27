@@ -35,7 +35,7 @@
 
 .monitoramento-page th {
   padding: 1rem;
-  text-align: center;
+  text-align: left;
   font-size: 0.9rem;
   font-weight: 700;
   color: #cbd5e1;
@@ -51,7 +51,6 @@
 
 .monitoramento-page td {
   padding: 1rem;
-  text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 0.95rem;
 }

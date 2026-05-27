@@ -66,9 +66,11 @@
 }
 
 .canal-treinamento {
-  background: #f3e8ff;
-  color: #7e22ce;
-  border-color: #d8b4fe;
+  font-size: 0.62rem;
+  word-wrap: break-word;
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .canal-icon {

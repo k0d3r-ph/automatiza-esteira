@@ -3,7 +3,7 @@ export type Empresa = {
 
   nomeEmpresa: string;
 
-  responsavel: "Pedro" | "Jean" | "Jeff" | "Natalia" | "";
+  responsavel: "Pedro" | "Jean" | "Jeff" | "Natalia" | "Clarice" | "";
 
   tipo: "Fast" | "Safety" | "";
 
