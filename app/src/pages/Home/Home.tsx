@@ -113,6 +113,8 @@ export default function Home() {
     await salvarEmpresas({
       ...clienteForm,
 
+      nomeEmpresa: clienteForm.nomeEmpresa.trim(),
+
       id: editandoClienteId || undefined,
 
       updatedAt: Date.now(),

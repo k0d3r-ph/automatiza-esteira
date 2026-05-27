@@ -188,7 +188,8 @@ export function Historico() {
       o.responsavel.toLowerCase().includes(texto);
 
     const empresaOk =
-      !empresaFiltro || o.empresa.toLowerCase() === empresaFiltro.toLowerCase();
+      !empresaFiltro ||
+      o.empresa.trim().toLowerCase() === empresaFiltro.trim().toLowerCase();
 
     return bateBusca && empresaOk;
   });
