@@ -18,6 +18,8 @@ export function calcularFarol({
   const finalizado = progresso >= 100;
 
   if (!finalizado) {
+    if (tme < 0) return "verde";
+
     if (tme > 4) {
       return "vermelho";
     }

@@ -238,7 +238,8 @@ export function Historico() {
           <tbody>
             {!loading &&
               filtradas.map((o) => {
-                const data = new Date(o.dataOcorrencia || o.createdAt || 0);
+                const timestamp = o.createdAt ?? o.dataOcorrencia ?? 0;
+                const data = timestamp ? new Date(timestamp) : null;
 
                 return (
                   <tr
