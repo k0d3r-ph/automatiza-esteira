@@ -182,6 +182,15 @@ export default function Home() {
     });
   }, [empresas, historico]);
 
+  const stats = useMemo(() => {
+    const total = dados.length;
+    const concluidos = dados.filter((e) => e.progresso >= 100).length;
+    const emAndamento = dados.filter(
+      (e) => e.progresso > 0 && e.progresso < 100,
+    ).length;
+    return { total, concluidos, emAndamento };
+  }, [dados]);
+
   const dadosFiltrados = useMemo(() => {
     return dados
       .filter((e) => {
@@ -222,6 +231,39 @@ export default function Home() {
         <button className="btn-primary" onClick={novoCliente}>
           + Novo cliente
         </button>
+      </div>
+
+      <div className="home-stats">
+        <div className="stat-card">
+          <span className="stat-icon">👥</span>
+          <div>
+            <p className="stat-label">Clientes na esteira</p>
+            <h3 className="stat-value">{stats.total}</h3>
+            <p className="stat-sub">Total de clientes</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-icon">✅</span>
+          <div>
+            <p className="stat-label">Concluídos</p>
+            <h3 className="stat-value">{stats.concluidos}</h3>
+            <p className="stat-sub">
+              {((stats.concluidos / stats.total) * 100).toFixed(1)}% do total
+            </p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-icon">⏳</span>
+          <div>
+            <p className="stat-label">Em andamento</p>
+            <h3 className="stat-value">{stats.emAndamento}</h3>
+            <p className="stat-sub">
+              {((stats.emAndamento / stats.total) * 100).toFixed(1)}% do total
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="home-filtros">

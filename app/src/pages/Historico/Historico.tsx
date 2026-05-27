@@ -100,7 +100,7 @@ export function Historico() {
   }
 
   function abrirNovo() {
-    setForm({ ...EMPTY });
+    setForm({ ...EMPTY, empresa: empresaFiltro || "" });
     setEditandoId(null);
     setPainelAberto(true);
   }
