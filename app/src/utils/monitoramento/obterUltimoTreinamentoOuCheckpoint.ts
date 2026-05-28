@@ -9,7 +9,8 @@ export function obterUltimoTreinamento(
   const treinamentos = historico.filter((item: Ocorrencia) => {
     return (
       item.empresa.trim().toLowerCase() === nome &&
-      item.tipo?.toLowerCase().includes("treinamento")
+      (item.tipo?.toLowerCase().includes("treinamento") ||
+        item.tipo?.toLowerCase() === "checkpoint")
     );
   });
 

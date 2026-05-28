@@ -353,11 +353,27 @@
 .hist-detail-card {
   width: 100%;
   max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
   background: white;
   border-radius: 18px;
   padding: 28px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   animation: detailIn 0.2s ease;
+  scrollbar-gutter: stable;
+}
+
+.hist-detail-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hist-detail-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hist-detail-card::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
 }
 
 @keyframes detailIn {
@@ -491,16 +507,22 @@
   border-color: #bbf7d0;
 }
 
-.canal-cs {
-  background: rgba(234, 179, 8, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(234, 179, 8, 0.3);
-}
-
 .tipo--treinamento {
   background: #f3e8ff;
   color: #7e22ce;
   border-color: #d8b4fe;
+}
+
+.tipo--checkpoint {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.canal-cs {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(234, 179, 8, 0.3);
 }
 
 .hist-item-desc {

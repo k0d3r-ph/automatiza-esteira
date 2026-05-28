@@ -13,7 +13,13 @@ import { Star, GraduationCap, Wrench, TrendingUp } from "lucide-react";
 
 import { FaWhatsapp } from "react-icons/fa";
 
-const TIPOS = ["Informativa", "Financeira", "Comercial", "Treinamento"];
+const TIPOS = [
+  "Informativa",
+  "Financeira",
+  "Comercial",
+  "Treinamento",
+  "Checkpoint",
+];
 
 const CANAIS = [
   "Whatsapp",
@@ -47,6 +53,7 @@ const TIPO_CLASS: Record<string, string> = {
   Informação: "tipo--informacao",
   Elogio: "tipo--elogio",
   Treinamento: "tipo--treinamento",
+  Checkpoint: "tipo--checkpoint",
 };
 
 const EMPTY: OcorrenciaForm = {
@@ -95,6 +102,17 @@ export function Historico() {
     }
     carregar();
   }, []);
+
+  useEffect(() => {
+    if (selecionada) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selecionada]);
 
   function set(campo: keyof typeof EMPTY, valor: string) {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -378,7 +396,9 @@ export function Historico() {
               <div className="hist-detail-desc">
                 <span>Descrição</span>
 
-                <p>{selecionada.descricao}</p>
+                <p style={{ whiteSpace: "pre-wrap" }}>
+                  {selecionada.descricao}
+                </p>
               </div>
 
               <div className="botoes">
