@@ -139,6 +139,10 @@ export function Historico() {
     setEditandoId(null);
   }
 
+  function normalizar(str: string) {
+    return str.trim().toLowerCase().replace(/&amp;/g, "&").replace(/\s+/g, " ");
+  }
+
   async function salvar() {
     console.log("temaOcorrencia:", form.temaOcorrencia);
     if (!form.empresa.trim() || !form.tipo || !form.descricao.trim()) {
@@ -188,14 +192,13 @@ export function Historico() {
     const texto = busca.toLowerCase();
 
     const bateBusca =
-      o.empresa.toLowerCase().includes(texto) ||
+      normalizar(o.empresa).includes(normalizar(texto)) ||
       o.tipo.toLowerCase().includes(texto) ||
       o.descricao.toLowerCase().includes(texto) ||
       o.responsavel.toLowerCase().includes(texto);
 
     const empresaOk =
-      !empresaFiltro ||
-      o.empresa.trim().toLowerCase() === empresaFiltro.trim().toLowerCase();
+      !empresaFiltro || normalizar(o.empresa) === normalizar(empresaFiltro);
 
     return bateBusca && empresaOk;
   });
@@ -255,13 +258,14 @@ export function Historico() {
                   >
                     <td>{o.empresa}</td>
 
-                    <td>{data.toLocaleDateString("pt-BR")}</td>
-
+                    <td>{data ? data.toLocaleDateString("pt-BR") : "—"}</td>
                     <td>
-                      {data.toLocaleTimeString("pt-BR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {data
+                        ? data.toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
                     </td>
 
                     <td>
@@ -507,8 +511,8 @@ export function Historico() {
                     ...(() => {
                       const empresa = empresasList.find(
                         (e) =>
-                          e.nomeEmpresa.trim().toLowerCase() ===
-                          form.empresa.trim().toLowerCase(),
+                          normalizar(e.nomeEmpresa) ===
+                          normalizar(form.empresa),
                       );
                       return empresa?.temaText
                         ? empresa.temaText

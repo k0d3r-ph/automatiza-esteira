@@ -112,8 +112,14 @@
   margin: 0 0 0.25rem 0;
 }
 
+.stat-value-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .stat-sub {
-  font-size: 0.8rem;
+  font-size: 0.8rem !important;
   color: #64748b;
   margin: 0;
 }

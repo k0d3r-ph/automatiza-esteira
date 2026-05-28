@@ -222,7 +222,7 @@ export default function Home() {
   return (
     <div className="monitoramento-page">
       <header>
-        <h1>Página principal</h1>
+        <h1>Radar</h1>
 
         <p>Acompanhe o progresso dos clientes na esteira de capacitação.</p>
       </header>
@@ -235,19 +235,21 @@ export default function Home() {
 
       <div className="home-stats">
         <div className="stat-card">
-          <span className="stat-icon">👥</span>
-          <div>
-            <p className="stat-label">Clientes na esteira</p>
-            <h3 className="stat-value">{stats.total}</h3>
+          <div className="stat-card-texto">
+            <div className="stat-value-row">
+              <h3 className="stat-value">{stats.total}</h3>
+              <p className="stat-label">Clientes na esteira</p>
+            </div>
             <p className="stat-sub">Total de clientes</p>
           </div>
         </div>
 
         <div className="stat-card">
-          <span className="stat-icon">✅</span>
-          <div>
-            <p className="stat-label">Concluídos</p>
-            <h3 className="stat-value">{stats.concluidos}</h3>
+          <div className="stat-card-texto">
+            <div className="stat-value-row">
+              <h3 className="stat-value">{stats.concluidos}</h3>
+              <p className="stat-label">Concluídos</p>
+            </div>
             <p className="stat-sub">
               {((stats.concluidos / stats.total) * 100).toFixed(1)}% do total
             </p>
@@ -255,10 +257,11 @@ export default function Home() {
         </div>
 
         <div className="stat-card">
-          <span className="stat-icon">⏳</span>
-          <div>
-            <p className="stat-label">Em andamento</p>
-            <h3 className="stat-value">{stats.emAndamento}</h3>
+          <div className="stat-card-texto">
+            <div className="stat-value-row">
+              <h3 className="stat-value">{stats.emAndamento}</h3>
+              <p className="stat-label">Em andamento</p>
+            </div>
             <p className="stat-sub">
               {((stats.emAndamento / stats.total) * 100).toFixed(1)}% do total
             </p>
@@ -433,7 +436,9 @@ export default function Home() {
 
             <button
               onClick={() =>
-                navigate(`/historico?empresa=${clienteSelecionado.nomeEmpresa}`)
+                navigate(
+                  `/historico?empresa=${encodeURIComponent(clienteSelecionado.nomeEmpresa)}`,
+                )
               }
             >
               Ver ocorrências
