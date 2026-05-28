@@ -194,7 +194,9 @@ export default function Home() {
   const dadosFiltrados = useMemo(() => {
     return dados
       .filter((e) => {
-        const clienteOk = !filtroCliente || e.nomeEmpresa === filtroCliente;
+        const clienteOk =
+          !filtroCliente ||
+          e.nomeEmpresa.toLowerCase().includes(filtroCliente.toLowerCase());
         const responsavelOk =
           !filtroResponsavel || e.responsavel === filtroResponsavel;
         const tipoOk = !filtroTipo || e.tipo === filtroTipo;
@@ -270,17 +272,12 @@ export default function Home() {
       </div>
 
       <div className="home-filtros">
-        <select
+        <input
+          className="home-busca-cliente"
+          placeholder="Buscar cliente..."
           value={filtroCliente}
           onChange={(e) => setFiltroCliente(e.target.value)}
-        >
-          <option value="">Todos os clientes</option>
-          {[...new Set(dados.map((e) => e.nomeEmpresa))].sort().map((nome) => (
-            <option key={nome} value={nome}>
-              {nome}
-            </option>
-          ))}
-        </select>
+        />
 
         <select
           value={filtroResponsavel}

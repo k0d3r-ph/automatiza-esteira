@@ -37,7 +37,7 @@ export default function ProgressBar({ value }: Props) {
           height: "100%",
           borderRadius: "999px",
           background: "#2ecc71",
-          transition: "width 0.8s ease",
+          transition: "width 1.5s ease",
         }}
       />
     </div>

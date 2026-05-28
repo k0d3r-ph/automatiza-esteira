@@ -310,6 +310,27 @@
   flex-wrap: wrap;
 }
 
+.home-busca-cliente {
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #1e293b;
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 200px;
+}
+
+.home-busca-cliente::placeholder {
+  color: #64748b;
+}
+
+.home-busca-cliente:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
 .home-filtros select {
   padding: 0.5rem 0.9rem;
   border-radius: 10px;
