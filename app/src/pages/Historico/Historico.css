@@ -143,10 +143,19 @@
   border-width: 2px !important;
 }
 
+.hist-nova-atualizacao {
+  margin-top: 1rem;
+}
+
+.hist-nova-atualizacao label {
+  margin-top: 1rem;
+}
+
 .botoes {
   display: flex;
   gap: 0.5rem;
   justify-content: end;
+  margin-top: 1rem;
 }
 
 .btn-secondary {

@@ -73,6 +73,9 @@ const EMPTY: OcorrenciaForm = {
 };
 
 export function Historico() {
+  const [novaAtualizacaoAberta, setNovaAtualizacaoAberta] = useState(false);
+  const [novaDescricaoAtual, setNovaDescricaoAtual] = useState("");
+  const [novoResponsavelAtual, setNovoResponsavelAtual] = useState("");
   const [empresasList, setEmpresasList] = useState<Empresa[]>([]);
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null);
@@ -92,6 +95,43 @@ export function Historico() {
     const lista = await listarOcorrencias();
     setOcorrencias(lista);
     setLoading(false);
+  }
+
+  async function salvarNovaAtualizacao() {
+    if (!novaDescricaoAtual.trim() || !novoResponsavelAtual.trim()) {
+      toast.error("Preencha a descrição e o responsável da atualização.");
+      return;
+    }
+
+    const atualizacoesAntigas = selecionada!.atualizacoes ?? [];
+    const atualizado = {
+      ...selecionada!,
+      atualizacoes: [
+        ...atualizacoesAntigas,
+        {
+          descricao: novaDescricaoAtual.trim(),
+          updatedAt: Date.now(),
+          responsavel: novoResponsavelAtual.trim(),
+        },
+      ],
+    };
+
+    setSalvando(true);
+    await salvarOcorrencia(atualizado);
+    await carregar();
+    setSalvando(false);
+    setNovaAtualizacaoAberta(false);
+    setNovaDescricaoAtual("");
+    setNovoResponsavelAtual("");
+    setSelecionada(atualizado); // atualiza o modal com os novos dados
+    toast.success("Atualização incluída!");
+  }
+
+  function fecharDetalhe() {
+    setSelecionada(null);
+    setNovaAtualizacaoAberta(false);
+    setNovaDescricaoAtual("");
+    setNovoResponsavelAtual("");
   }
 
   useEffect(() => {
@@ -167,8 +207,13 @@ export function Historico() {
   }
 
   async function salvar() {
-    if (!form.empresa.trim() || !form.tipo || !form.descricao.trim()) {
-      toast.error("Preencha empresa, tipo e descrição.");
+    if (
+      !form.empresa.trim() ||
+      !form.tipo ||
+      !form.descricao.trim() ||
+      !form.responsavel.trim()
+    ) {
+      toast.error("Preencha empresa, tipo, descrição e responsável.");
       return;
     }
 
@@ -347,10 +392,7 @@ export function Historico() {
         </table>
 
         {selecionada && (
-          <div
-            className="hist-detail-overlay"
-            onClick={() => setSelecionada(null)}
-          >
+          <div className="hist-detail-overlay" onClick={() => fecharDetalhe()}>
             <div
               className="hist-detail-card"
               onClick={(e) => e.stopPropagation()}
@@ -358,7 +400,7 @@ export function Historico() {
               <div className="hist-detail-header">
                 <h2>Detalhes da interação</h2>
 
-                <button onClick={() => setSelecionada(null)}>✕</button>
+                <button onClick={() => fecharDetalhe()}>✕</button>
               </div>
 
               <div className="hist-detail-grid">
@@ -449,11 +491,62 @@ export function Historico() {
                   </div>
                 )}
 
+              {/* Formulário de nova atualização */}
+              {novaAtualizacaoAberta && (
+                <div className="hist-nova-atualizacao">
+                  <div className="hist-campo">
+                    <label>Nova descrição *</label>
+                    <textarea
+                      rows={4}
+                      value={novaDescricaoAtual}
+                      onChange={(e) => setNovaDescricaoAtual(e.target.value)}
+                      placeholder="Descreva a atualização..."
+                    />
+                  </div>
+                  <div className="hist-campo">
+                    <label>Responsável *</label>
+                    <input
+                      value={novoResponsavelAtual}
+                      onChange={(e) => setNovoResponsavelAtual(e.target.value)}
+                      placeholder="Nome do responsável"
+                    />
+                  </div>
+                  <div className="botoes">
+                    <button
+                      className="btn-ghost btn-small"
+                      onClick={() => {
+                        setNovaAtualizacaoAberta(false);
+                        setNovaDescricaoAtual("");
+                        setNovoResponsavelAtual("");
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn-primary btn-small"
+                      onClick={salvarNovaAtualizacao}
+                      disabled={salvando}
+                    >
+                      {salvando ? "Salvando..." : "Confirmar atualização"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="botoes">
+                {!novaAtualizacaoAberta && (
+                  <button
+                    className="btn-secondary btn-small"
+                    onClick={() => setNovaAtualizacaoAberta(true)}
+                  >
+                    + Incluir nova atualização
+                  </button>
+                )}
+
                 <button
                   className="btn-secondary btn-small"
                   onClick={() => {
-                    setSelecionada(null);
+                    fecharDetalhe();
                     abrirEdicao(selecionada);
                   }}
                 >
@@ -463,7 +556,7 @@ export function Historico() {
                 <button
                   className="btn-danger"
                   onClick={() => {
-                    setSelecionada(null);
+                    fecharDetalhe();
                     excluir(selecionada.id!);
                   }}
                 >
@@ -615,18 +708,38 @@ export function Historico() {
               <label>Descrição *</label>
               <textarea
                 value={form.descricao}
-                onChange={(e) => set("descricao", e.target.value)}
+                onChange={(e) =>
+                  !editandoId && set("descricao", e.target.value)
+                }
+                readOnly={!!editandoId}
                 placeholder="Descreva a ocorrência com detalhes..."
                 rows={5}
+                style={
+                  editandoId
+                    ? { opacity: 0.5, cursor: "not-allowed", resize: "none" }
+                    : {}
+                }
               />
+              {editandoId && (
+                <small style={{ color: "var(--text-muted)" }}>
+                  Para adicionar uma nova descrição, use{" "}
+                  <b>"Incluir nova atualização"</b> nos detalhes.
+                </small>
+              )}
             </div>
 
             <div className="hist-campo">
-              <label>Responsável</label>
+              <label>Responsável *</label>
               <input
                 value={form.responsavel}
-                onChange={(e) => set("responsavel", e.target.value)}
+                onChange={(e) =>
+                  !editandoId && set("responsavel", e.target.value)
+                }
+                readOnly={!!editandoId}
                 placeholder="Nome do responsável"
+                style={
+                  editandoId ? { opacity: 0.5, cursor: "not-allowed" } : {}
+                }
               />
             </div>
 
