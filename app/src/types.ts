@@ -25,23 +25,30 @@ export type Ocorrencia = {
   empresa: string;
   tipo: string;
   descricao: string;
-  canal: string;
+  departamento: string;
   responsavel: string;
   createdAt?: number;
   dataOcorrencia: number;
   updatedAt?: number;
   temaOcorrencia?: string[];
+  atualizacoes?: Atualizacao[];
 };
 
 export type OcorrenciaForm = {
   empresa: string;
   tipo: string;
   descricao: string;
-  canal: string;
+  departamento: string;
   responsavel: string;
   dataOcorrencia: string;
   horaOcorrencia?: string;
   temaOcorrencia?: string[];
+};
+
+export type Atualizacao = {
+  descricao: string;
+  updatedAt: number;
+  responsavel?: string;
 };
 
 export interface Historico {

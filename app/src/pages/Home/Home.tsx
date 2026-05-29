@@ -23,6 +23,7 @@ import {
   obterUltimoTreinamento,
 } from "../../utils/monitoramento";
 import type { Empresa, Ocorrencia } from "../../types";
+import { toast } from "sonner";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -107,6 +108,18 @@ export default function Home() {
 
   async function salvarCliente() {
     if (!clienteForm.nomeEmpresa.trim()) {
+      return;
+    }
+
+    const nomeTrimmed = clienteForm.nomeEmpresa.trim().toLowerCase();
+    const duplicado = empresas.some(
+      (e) =>
+        e.nomeEmpresa.trim().toLowerCase() === nomeTrimmed &&
+        e.id !== editandoClienteId,
+    );
+
+    if (duplicado) {
+      toast.error("Cliente já existente.");
       return;
     }
 

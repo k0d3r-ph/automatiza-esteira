@@ -9,9 +9,14 @@ import {
 import { listarEmpresas } from "../../services/empresas";
 import type { Ocorrencia, Empresa, OcorrenciaForm } from "../../types";
 import "./Historico.css";
-import { Star, GraduationCap, Wrench, TrendingUp } from "lucide-react";
-
-import { FaWhatsapp } from "react-icons/fa";
+import {
+  Star,
+  GraduationCap,
+  Wrench,
+  TrendingUp,
+  Code,
+  Cpu,
+} from "lucide-react";
 
 const TIPOS = [
   "Informativa",
@@ -21,37 +26,37 @@ const TIPOS = [
   "Checkpoint",
 ];
 
-const CANAIS = [
-  "Whatsapp",
-  "CSAT",
-  "Interna Treinamento",
-  "Interna CS",
-  "Interna Suporte",
-  "Interna Comercial",
+const DEPARTAMENTO = [
+  "Treinamento",
+  "CS",
+  "Suporte",
+  "Hardware",
+  "Comercial",
+  "Desenvolvimento",
 ];
 
-const CANAIS_CLASS: Record<string, string> = {
-  Whatsapp: "canal-whatsapp",
-  CSAT: "canal-csat",
-  "Interna Treinamento": "canal-treinamento",
-  "Interna CS": "canal-cs",
-  "Interna Suporte": "canal-interna-suporte",
-  "Interna Comercial": "canal-interna-comercial",
+const DEPARTAMENTO_CLASS: Record<string, string> = {
+  Treinamento: "departamento-treinamento",
+  CS: "departamento-cs",
+  Suporte: "departamento-suporte",
+  Hardware: "departamento-hardware",
+  Comercial: "departamento-comercial",
+  Desenvolvimento: "departamento-desenvolvimento",
 };
 
-const CANAIS_ICONES: Record<string, React.ReactNode> = {
-  Whatsapp: <FaWhatsapp size={14} />,
-  CSAT: <Star size={14} />,
+const DEPARTAMENTO_ICONES: Record<string, React.ReactNode> = {
   Treinamento: <GraduationCap size={14} />,
-  "Interna Suporte": <Wrench size={14} />,
-  "Interna Comercial": <TrendingUp size={14} />,
+  CS: <Star size={14} />,
+  Suporte: <Wrench size={14} />,
+  Hardware: <Cpu size={14} />,
+  Comercial: <TrendingUp size={14} />,
+  Desenvolvimento: <Code size={14} />,
 };
 
 const TIPO_CLASS: Record<string, string> = {
-  Reclamação: "tipo--reclamacao",
-  Solicitação: "tipo--solicitacao",
-  Informação: "tipo--informacao",
-  Elogio: "tipo--elogio",
+  Informativa: "tipo--informativa",
+  Financeira: "tipo--financeira",
+  Comercial: "tipo--comercial",
   Treinamento: "tipo--treinamento",
   Checkpoint: "tipo--checkpoint",
 };
@@ -60,7 +65,7 @@ const EMPTY: OcorrenciaForm = {
   empresa: "",
   tipo: "",
   descricao: "",
-  canal: "",
+  departamento: "",
   responsavel: "",
   dataOcorrencia: "",
   horaOcorrencia: "",
@@ -142,7 +147,7 @@ export function Historico() {
       tipo: o.tipo,
       descricao: o.descricao,
       responsavel: o.responsavel,
-      canal: o.canal,
+      departamento: o.departamento ?? "",
       dataOcorrencia: dataFormatada,
       horaOcorrencia: hora,
       temaOcorrencia: o.temaOcorrencia ?? [],
@@ -162,14 +167,12 @@ export function Historico() {
   }
 
   async function salvar() {
-    console.log("temaOcorrencia:", form.temaOcorrencia);
     if (!form.empresa.trim() || !form.tipo || !form.descricao.trim()) {
       toast.error("Preencha empresa, tipo e descrição.");
       return;
     }
 
     let timestamp = 0;
-
     if (form.dataOcorrencia) {
       const [year, month, day] = form.dataOcorrencia.split("-").map(Number);
       const [hours, minutes] = (form.horaOcorrencia || "00:00")
@@ -178,11 +181,37 @@ export function Historico() {
       timestamp = new Date(year, month - 1, day, hours, minutes).getTime();
     }
 
-    const base = { ...form, dataOcorrencia: timestamp };
+    const ocorrenciaOriginal = editandoId
+      ? ocorrencias.find((o) => o.id === editandoId)
+      : null;
+
+    const novaDescricao = form.descricao.trim();
+    const descricaoMudou =
+      ocorrenciaOriginal && novaDescricao !== ocorrenciaOriginal.descricao;
+
+    const atualizacoesAntigas = ocorrenciaOriginal?.atualizacoes ?? [];
+
+    const atualizacoes = descricaoMudou
+      ? [
+          ...atualizacoesAntigas,
+          {
+            descricao: novaDescricao,
+            updatedAt: Date.now(),
+            responsavel: form.responsavel || undefined,
+          },
+        ]
+      : atualizacoesAntigas;
+
+    const base = {
+      ...form,
+      // mantém a descrição original intacta
+      descricao: ocorrenciaOriginal?.descricao ?? form.descricao,
+      dataOcorrencia: timestamp,
+      atualizacoes,
+    };
 
     setSalvando(true);
     await salvarOcorrencia(editandoId ? { ...base, id: editandoId } : base);
-
     await carregar();
     setSalvando(false);
     cancelar();
@@ -255,7 +284,7 @@ export function Historico() {
               <th>Empresa</th>
               <th>Data</th>
               <th>Hora</th>
-              <th>Canal de interação</th>
+              <th>Departamento</th>
               <th>Tipo de registro</th>
               <th>Responsável</th>
               <th>Ações</th>
@@ -288,13 +317,13 @@ export function Historico() {
 
                     <td>
                       <span
-                        className={`hist-item-canal ${CANAIS_CLASS[o.canal] || ""}`}
+                        className={`hist-item-departamento ${DEPARTAMENTO_CLASS[o.departamento] || ""}`}
                       >
-                        <span className="canal-icon">
-                          {CANAIS_ICONES[o.canal]}
+                        <span className="departamento-icon">
+                          {DEPARTAMENTO_ICONES[o.departamento]}
                         </span>
 
-                        {o.canal}
+                        {o.departamento}
                       </span>
                     </td>
 
@@ -339,8 +368,8 @@ export function Historico() {
                 </div>
 
                 <div>
-                  <span>Canal</span>
-                  <strong>{selecionada.canal}</strong>
+                  <span>Departamento</span>
+                  <strong>{selecionada.departamento}</strong>
                 </div>
 
                 <div>
@@ -395,11 +424,30 @@ export function Historico() {
 
               <div className="hist-detail-desc">
                 <span>Descrição</span>
-
                 <p style={{ whiteSpace: "pre-wrap" }}>
                   {selecionada.descricao}
                 </p>
               </div>
+
+              {selecionada.atualizacoes &&
+                selecionada.atualizacoes.length > 0 && (
+                  <div className="hist-atualizacoes">
+                    {selecionada.atualizacoes.map((at, i) => (
+                      <div key={i} className="hist-atualizacao-item">
+                        <span className="hist-atualizacao-meta">
+                          Atualização em{" "}
+                          {new Date(at.updatedAt).toLocaleDateString("pt-BR")}{" "}
+                          {new Date(at.updatedAt).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {at.responsavel ? ` · ${at.responsavel}` : ""}
+                        </span>
+                        <p style={{ whiteSpace: "pre-wrap" }}>{at.descricao}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
               <div className="botoes">
                 <button
@@ -507,13 +555,13 @@ export function Historico() {
             </div>
 
             <div className="hist-campo">
-              <label>Canal de Interação *</label>
+              <label>Departamento *</label>
               <select
-                value={form.canal}
-                onChange={(e) => set("canal", e.target.value)}
+                value={form.departamento}
+                onChange={(e) => set("departamento", e.target.value)}
               >
                 <option value="">Selecione...</option>
-                {CANAIS.map((t) => (
+                {DEPARTAMENTO.map((t) => (
                   <option key={t} value={t}>
                     {t}
                   </option>

@@ -10,7 +10,8 @@ export function obterUltimoTreinamento(
     return (
       item.empresa.trim().toLowerCase() === nome &&
       (item.tipo?.toLowerCase().includes("treinamento") ||
-        item.tipo?.toLowerCase() === "checkpoint")
+        item.tipo?.toLowerCase() === "checkpoint" ||
+        item.tipo?.toLowerCase() === "informativa")
     );
   });
 
