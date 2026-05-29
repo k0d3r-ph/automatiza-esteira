@@ -52,6 +52,12 @@ export default function Home() {
     dataText: "",
     currentPhase: 0,
     updatedAt: 0,
+    csResponsavel: "",
+    comercialResponsavel: "",
+    telefone: "",
+    persona: "",
+    decisor: "",
+    localizacao: "",
   };
 
   const [clienteForm, setClienteForm] = useState<Empresa>(EMPTY_CLIENTE);
@@ -331,17 +337,17 @@ export default function Home() {
           filtroResponsavel ||
           filtroTipo ||
           filtroProgresso) && (
-          <button
-            onClick={() => {
-              setFiltroCliente("");
-              setFiltroResponsavel("");
-              setFiltroTipo("");
-              setFiltroProgresso("");
-            }}
-          >
-            Limpar filtros
-          </button>
-        )}
+            <button
+              onClick={() => {
+                setFiltroCliente("");
+                setFiltroResponsavel("");
+                setFiltroTipo("");
+                setFiltroProgresso("");
+              }}
+            >
+              Limpar filtros
+            </button>
+          )}
       </div>
 
       <table>
@@ -432,34 +438,83 @@ export default function Home() {
           onClick={() => setClienteSelecionado(null)}
         >
           <div className="cliente-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{clienteSelecionado.nomeEmpresa}</h2>
+            <div className="cliente-modal-header">
+              <span className="cliente-modal-icon">🏢</span>
+              <h2>{clienteSelecionado.nomeEmpresa}</h2>
+            </div>
 
-            <button onClick={() => editarCliente(clienteSelecionado)}>
-              Editar cliente
-            </button>
+            <div className="cliente-info-details">
+              <div className="info-item">
+                <span className="info-label">CS Responsável</span>
+                <span className="info-value">
+                  {clienteSelecionado.csResponsavel || "-"}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Comercial Responsável</span>
+                <span className="info-value">
+                  {clienteSelecionado.comercialResponsavel || "-"}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Telefone</span>
+                <span className="info-value">
+                  {clienteSelecionado.telefone || "-"}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Persona</span>
+                <span className="info-value">
+                  {clienteSelecionado.persona || "-"}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Decisor</span>
+                <span className="info-value">
+                  {clienteSelecionado.decisor || "-"}
+                </span>
+              </div>
+              <div className="info-item full-width">
+                <span className="info-label">Localização</span>
+                <span className="info-value">
+                  {clienteSelecionado.localizacao || "-"}
+                </span>
+              </div>
+            </div>
 
-            <button
-              onClick={() => navigate(`/esteira/${clienteSelecionado.id}`)}
-            >
-              Ver esteira
-            </button>
+            <div className="cliente-modal-actions">
+              <button
+                className="btn-editar"
+                onClick={() => editarCliente(clienteSelecionado)}
+              >
+                Editar cliente
+              </button>
 
-            <button
-              onClick={() =>
-                navigate(
-                  `/historico?empresa=${encodeURIComponent(clienteSelecionado.nomeEmpresa)}`,
-                )
-              }
-            >
-              Ver ocorrências
-            </button>
+              <button
+                className="btn-esteira"
+                onClick={() => navigate(`/esteira/${clienteSelecionado.id}`)}
+              >
+                Ver esteira
+              </button>
 
-            <button
-              className="btn-excluir"
-              onClick={() => excluirCliente(clienteSelecionado.id!)}
-            >
-              Excluir cliente
-            </button>
+              <button
+                className="btn-ocorrencias"
+                onClick={() =>
+                  navigate(
+                    `/historico?empresa=${encodeURIComponent(clienteSelecionado.nomeEmpresa)}`,
+                  )
+                }
+              >
+                Ver ocorrências
+              </button>
+
+              <button
+                className="btn-excluir"
+                onClick={() => excluirCliente(clienteSelecionado.id!)}
+              >
+                Excluir cliente
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -491,52 +546,143 @@ export default function Home() {
               />
             </div>
 
-            <div className="form-group">
-              <label>Responsável</label>
-              <select
-                value={clienteForm.responsavel}
-                onChange={(e) =>
-                  setClienteForm({
-                    ...clienteForm,
-                    responsavel: e.target.value as Empresa["responsavel"],
-                  })
-                }
-              >
-                <option value="">Selecione...</option>
-                <option value="Pedro">Pedro</option>
-                <option value="Jean">Jean</option>
-                <option value="Jeff">Jeff</option>
-                <option value="Natalia">Natalia</option>
-                <option value="Clarice">Clarice</option>
-              </select>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Responsável</label>
+                <select
+                  value={clienteForm.responsavel}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      responsavel: e.target.value as Empresa["responsavel"],
+                    })
+                  }
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Pedro">Pedro</option>
+                  <option value="Jean">Jean</option>
+                  <option value="Jeff">Jeff</option>
+                  <option value="Natalia">Natalia</option>
+                  <option value="Clarice">Clarice</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Tipo</label>
+                <select
+                  value={clienteForm.tipo}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      tipo: e.target.value as Empresa["tipo"],
+                    })
+                  }
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Fast">Fast</option>
+                  <option value="Safety">Safety</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>CS responsável</label>
+                <input
+                  placeholder="Ex: Clarice"
+                  value={clienteForm.csResponsavel || ""}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      csResponsavel: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Comercial responsável</label>
+                <input
+                  placeholder="Ex: Carlos"
+                  value={clienteForm.comercialResponsavel || ""}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      comercialResponsavel: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Telefone de contato</label>
+                <input
+                  placeholder="Ex: (11) 99999-9999"
+                  value={clienteForm.telefone || ""}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      telefone: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Data de entrada</label>
+                <input
+                  type="date"
+                  value={clienteForm.dataEntrada}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      dataEntrada: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Persona</label>
+                <input
+                  placeholder="Ex: Empreendedor"
+                  value={clienteForm.persona || ""}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      persona: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Decisor</label>
+                <input
+                  value={clienteForm.decisor || ""}
+                  onChange={(e) =>
+                    setClienteForm({
+                      ...clienteForm,
+                      decisor: e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
 
             <div className="form-group">
-              <label>Tipo</label>
-              <select
-                value={clienteForm.tipo}
-                onChange={(e) =>
-                  setClienteForm({
-                    ...clienteForm,
-                    tipo: e.target.value as Empresa["tipo"],
-                  })
-                }
-              >
-                <option value="">Selecione...</option>
-                <option value="Fast">Fast</option>
-                <option value="Safety">Safety</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Data de entrada</label>
+              <label>Localização (Endereço)</label>
               <input
-                type="date"
-                value={clienteForm.dataEntrada}
+                placeholder="Ex: Av. Paulista, 1000 - São Paulo/SP"
+                value={clienteForm.localizacao || ""}
                 onChange={(e) =>
                   setClienteForm({
                     ...clienteForm,
-                    dataEntrada: e.target.value,
+                    localizacao: e.target.value,
                   })
                 }
               />

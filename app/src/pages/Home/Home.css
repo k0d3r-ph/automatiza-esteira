@@ -144,7 +144,9 @@
 }
 
 .cliente-modal {
-  width: 420px;
+  width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
   background: #0f172a;
   border-radius: 20px;
   padding: 2rem;
@@ -387,4 +389,48 @@
   height: 16px;
   cursor: pointer;
   accent-color: #3b82f6;
+}
+
+/* Novos estilos para informações de cliente */
+.cliente-info-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.info-item.full-width {
+  grid-column: span 2;
+}
+
+.info-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  word-break: break-word;
+}
+
+/* Novo layout em grid de 2 colunas para formulários */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }

@@ -18,6 +18,18 @@ export type Empresa = {
   currentPhase: number;
 
   updatedAt: number;
+
+  csResponsavel?: string;
+
+  comercialResponsavel?: string;
+
+  telefone?: string;
+
+  persona?: string;
+
+  decisor?: string;
+
+  localizacao?: string;
 };
 
 export type Ocorrencia = {
